@@ -35,8 +35,34 @@
 \setcounter{page}{1}
 
 \section{Odczytywanie przebiegów instrukcji na oscyloskopie}
+Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapisywanie do pamięci, wczytywanie i zapisywanie do przestrzeni wejścia/wyjśćia oraz cykl pobierania i dekodowania kodu instrukcji.
+W celu realizacji zadania napisaliśmy prosty program w Assembly Z80, który po uruchomieniu w aplikacji NoICE i włączeniu trybu RUN pozwalał na obserwację wyżej wymienionych przebiegów.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque gravida, est non consectetur dapibus, mauris massa pretium tortor, ut congue ex ligula at ante. Praesent blandit risus eu quam mattis, eu vulputate ante luctus. Etiam vitae quam justo. In sit amet hendrerit velit, non feugiat enim. In sit amet porttitor justo. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse potenti. Morbi facilisis lectus venenatis mauris lacinia, in aliquet ligula semper. Ut placerat, mauris at hendrerit consequat, eros odio efficitur nisl, non fringilla lorem nisl ac diam. Donec eget egestas dui. Sed ultricies pulvinar eros, sit amet ultrices mauris efficitur ut. Donec at ligula pretium, varius diam eu, aliquet urna. Quisque condimentum, nulla iaculis pharetra cursus, purus felis posuere tellus, quis interdum ante velit vel libero. Donec eget egestas ante. In posuere odio nec libero dignissim, a mollis felis laoreet.
+%TODO: wstawić kod do zadania 1
+`
+Cykl fetch:
+Na początku realizacji każdego polecenia mikroprocesor pobiera kod instrukcji, co jest sygnalizowane stanem niskim na wyjściach $\overline{MREQ}$, $\overline{RD}$ oraz $\overline{M1}$. Następnie następuje odświeżenie pamięci sygnalizowane stanem niskim jedynie na wyjściu $\overline{MREQ}$ (oraz $\overline{RFSH}$, lecz nie widć tego na oscylogramie). W trakcie odświeżania dekodowany jest także kod pobranej instrukcji.
+Powyższą instrukcję można zaobserwować w bloku nr1 na poniższym zdjęciu
+
+Cykl odczytu z pamięci
+Podczas tego cyklu zaznaczonego w bloku nr2 nastęuje pobranie argumentów do wykonania polecenia OUT, a więc odczyt z pamięci.
+Sygnalizowane jest to niskim stanem na wyjściach $\overline{MREQ}$ i $\overline{RD}$
+%TODO: sprawwdzić jakie polecenie
+
+Zapis do układów wejścia/wyjścia:
+Podczas cyklu zaznaczonego w bloku nr 3 następuje zapis do układów wejścia/wyjścia realizowany przez instrukcję OUT, sygnalizowane jest to stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie).
+%TODO do sprawdzenia
+
+Odczyt z przestrzeni wejścia/wyjścia:
+Podczas cyklu zaznaczonego w bloku nr 4 następuje udczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowane jest to stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$.
+%TODO sprawdzić
+
+Cykl zapisu do pamięci:
+Podczas cyklu zaznaczonego w bloku nr 5 następuje zapis do pamięci realizowany przez isntrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie).
+   
+
+
+
 
 \begin{figure}[H]
 	\centering
@@ -51,9 +77,15 @@ Naszym zdaniem było wstawianie dwóch taktów opóźnienia przy odczytywaniu da
 Pierwszą naszą czynnościa było stworzenie funkcji logicznej, która przymowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy, że użyjemy multipleksera.
 
 % TODO: napisać o module SML-3 z rejestrem
-Do odliczania taktów zegara procesora zdecydowaliśmy się użyć rejestru przesuwnego z modułu SML-3. Pozwala on zliczyć maksymalnie 4 takty zegara, więc biorąc pod uwagę wbudowany takt oczekiwania byliśmy w stanie dodać maksymalnie 3 takty. ale było to wystarczające do wykonania zadania. Wejściem zegarowym rejestru był zanegowany sygnał zegarowy, gdyż pozwalało to uzyskać maksymalną liczbę taktów opóźnienia. Przy niezanegowanym sygnale zegarowym zawartość rejestu była przesuwana w s Alternatywą byłoby użycie licznika, lecz rejestr był rozwiązaniem prostszym.
+Do odliczania taktów zegara procesora zdecydowaliśmy się użyć rejestru przesuwnego z modułu SML-3. Pozwala on zliczyć maksymalnie 4 takty zegara, więc biorąc pod uwagę wbudowany takt oczekiwania byliśmy w stanie dodać maksymalnie 3 takty. ale było to wystarczające do wykonania zadania. Wejściem zegarowym rejestru był zanegowany sygnał zegarowy,ponieważ sygnał WAIT był próbkowany przez procesor podczas opadającego zbocza zegara, więc każde przesunięcie zawartości rejestru oznaczało wydłużenie sygnału opóźniającego o jeden takt.  Alternatywą do naszego rozwiązania było użycie licznika, lecz rejestr był rozwiązaniem prostszym.
+
+Ładowanie rejestru oraz przesuwanie odbywało się przez podłączenie do wejścia \textit{s0} sygnału $\overline{IORQ}$: w stanie wysokim następowało ładowanie rejestru, a w stanie niskim przesuwanie.
+
+Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z modułu przełączników szesnastkowych IN\_4xHEX.
 
 Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzone do wejść bramki \textit{NAND}. W ten sposób otrzymaliśmy wymagany sygnał $\overline{WAIT}$.
+
+%TODO: wstawić kod do zadania 2
 
 \begin{figure}[H]
 	\centering
@@ -82,6 +114,14 @@ Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzon
 
 \section{Wstrzymywanie pracy procesora}
 
+Ostatnim zadaniem była modyfikacja poprzedniego układu w taki sposób, aby zamiast wstawiać takty oczekiwania, generować sygnał $\overline{WAIT}$ do momentu uzyskania zbocza przełącznika.
+Zdecydowaliśmy się zastąpić rejestr przerzutnikiem typu D, gdyż element zliczający nie był już potrzebny, a wystarczył prosty układ z pamięcią. Przerzutnik pozwalał nam też na trywialne wykrywanie zbocza przełączania przez podłączenie go do wejścia zegarowego.
+W normalnych warunkach (gdy procesor nie wpadał w pułapkę) przerzutnik był zerowany seygnałem \textit{M1}. Do wejścia D była podpięty sały sygnał wysoki, dzięki czemu zbocze przełącznika powodowało dezaktywację sygnału $\overline{WAIT}$ poprzez resetowanie wyjścia $\overline{Q}$ przerzutnika.
+
+Układ multipleksera pozostawiliśmy bez zmian, natomiast do bramki NAND, z której wychodzi sygnał $\overline{WAIT}$, zamiast najmniej znaczącego bitu rejestru podłączyliśmt wyjście $\overline{Q}$ przerzutnika.
+
+%TODO: wstawić kod z zadania 3
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.75\textwidth]{img/3a.png}
@@ -99,5 +139,12 @@ Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzon
 	\includegraphics[width=0.75\textwidth]{img/3c.png}
 	\caption{}
 \end{figure}
+
+\section{Problemy}
+
+Podczas prób budowy zaprojektowanych układów natrafiliśmy na kilka problemów, które ostatecznie udało nam się rozwiązać.
+Jednym z nich były szybko zanikające sygnały. Było to spowodowane podłączeniem dwóch modułów BNC. Pomimo uzyskania prawidłowego działania układu sygnał $\overline{WAIT}$ był zbyt słaby, aby procesor mógł zauważyć jego zmiany- przez cały czas traktował jego stan jako niski. Aby uniknąć tej sytuacji podczas testowania układu korzystaliśmy z sond dołączonych do oscyloskopu.
+Kolejnym problemem było podłączenie licznika do układu z zadania drugiego. Podczas testów okazało się, że sygnał przeniesienia znikał zbyt szybko, więc procesor nie zauważał zmiany sygnału $\overline{WAIT}$ i nie mógł zmienić stanu wyjść, wobec teego licznik zaczynal liczyć od zera. Powodowało to zarzymanie procesora. Problem następował przy zliczaniu do 16. Znaleźliśmy dwa rozwiązania tego problemu, jednym było zliczanie do 8 i wykorzystanie najstarszego bitu jako bit przeniesienia lub użycie rejestru. Ostatecznie zdecydowaliśmy się na wykorzystanie drugiej opcji.
+
 
 \end{document}
