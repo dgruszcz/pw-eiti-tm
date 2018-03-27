@@ -6,11 +6,12 @@
 \usepackage{parskip}
 \usepackage{icomma}
 \usepackage[a4paper,includeheadfoot,margin=2.54cm]{geometry}
-\usepackage{svg}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{subcaption}
+
+
 
 \renewcommand\thesection{\arabic{section}.}
 \renewcommand\thesubsection{\arabic{section}. \alph{subsection})}
@@ -33,6 +34,10 @@
 \pagebreak
 
 \setcounter{page}{1}
+
+\section{Pierwsze laboratorium}
+
+Na pierwszym laboratorium mieliśmy za zadanie oswoić się z układem FPGA symulującym mikroprocesor Z80 przez rozpoznanie podstawowych instrukcji wejścia/wyjścia oraz pamięci. Ćwiczenie składało się z trzech punktów: przedstawienia podstawowych instrukcji na oscyloskopie, złożenia układu atywującego sygnał $\overline{WAIT}$ na zadaną ilość taktów po spełnieniu określonych warunków oraz zbudowania układu pułakpującego procesor w tym sygnale do czasu wyzwolenia przełącznikiem bistabilnym. 
 
 \section{Odczytywanie przebiegów instrukcji na oscyloskopie}
 Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapisywanie do pamięci, wczytywanie i zapisywanie do przestrzeni wejścia/wyjśćia oraz cykl pobierania i dekodowania kodu instrukcji.
@@ -89,6 +94,11 @@ Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzon
 
 \begin{figure}[H]
 	\centering
+
+
+%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2a.png}}
+%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2b.png}}	
+
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{img/2a.png}
 		\caption{}
