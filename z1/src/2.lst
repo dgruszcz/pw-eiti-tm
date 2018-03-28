@@ -1,0 +1,12 @@
+# File 2.asm
+0000				ORG 1800h 
+1800			 
+1800			start: 
+1800 db 00			IN  A, (0h) 
+1802 d3 00			OUT (0h), A 
+1804 32 00 19			LD  (1900h), A 
+1807 db 04			IN  A, (04h) 
+1809 18 f5			JR  start 
+180b			 
+# End of file 2.asm
+180b
