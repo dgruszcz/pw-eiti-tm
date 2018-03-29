@@ -45,8 +45,10 @@
 
 Na pierwszym laboratorium mieliśmy za zadanie oswoić się z układem FPGA symulującym mikroprocesor Z80 przez rozpoznanie podstawowych instrukcji wejścia/wyjścia oraz pamięci. Ćwiczenie składało się z trzech punktów: przedstawienia podstawowych instrukcji na oscyloskopie, złożenia układu atywującego sygnał $\overline{WAIT}$ na zadaną ilość taktów po spełnieniu określonych warunków oraz zbudowania układu pułakpującego procesor w tym sygnale do czasu wyzwolenia przełącznikiem bistabilnym.
 
-%TODO: dodać nazwy układów, których używaliśmy
-Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3, schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć procesor w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE.
+%TODO: zrobić listę z wymienionych układów
+Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3: ${10\_PS1}$ (moduł zasilacza), ${100\_LED8}$ (zestaw 8 diod), ${13x\_IN6}$ (zestaw bistabilnych przełączników), ${202\_NAND}$ (zestaw bramek nand z dodatkowymi bramkami negującymi), ${380\_NOTx6}$ (moduł sześciu bramek negujących), ${451\_IN\_4xHEX}$ (zestaw przełączników szesnastkowych), ${331\_MUX-Dx2}$ (zestaw multiplekserów oraz przerzutników typu D), ${400\_74194x2}$ (moduł rejestrów przesuwnych) oraz procesora Z80 zrealizowanego na układzie FPGA. Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli podczas testowania programu, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć aplikację w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE.
+
+
 
 \section{Odczytywanie przebiegów instrukcji na oscyloskopie}
 Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapisywanie do pamięci, wczytywanie i zapisywanie do przestrzeni wejścia/wyjśćia oraz cykl pobierania kodu instrukcji.
@@ -54,10 +56,11 @@ W celu realizacji zadania napisaliśmy prosty program w Assembly Z80, który po 
 
 \lstinputlisting{src/1.lst}
 
+%TODO: dodać rozmiary instrukcji i argumentów
 \subsection{Cykl fetch}
 
-Na początku realizacji każdego polecenia mikroprocesor pobiera kod instrukcji, co jest sygnalizowane stanem niskim na wyjściach $\overline{MREQ}$, $\overline{RD}$ oraz $\overline{M1}$. Następnie następuje odświeżenie pamięci sygnalizowane stanem niskim jedynie na wyjściu $\overline{MREQ}$ (oraz $\overline{RFSH}$, lecz nie widać tego na oscylogramie). W trakcie odświeżania dekodowany jest także kod pobranej instrukcji.
-Powyższą instrukcję można zaobserwować w bloku \square{red} na poniższym zdjęciu.
+Na początku realizacji każdego polecenia mikroprocesor pobiera kod instrukcji, co jest sygnalizowane stanem niskim na wyjściach $\overline{MREQ}$, $\overline{RD}$ oraz $\overline{M1}$. Zaraz potem następuje odświeżenie pamięci sygnalizowane stanem niskim jedynie na wyjściu $\overline{MREQ}$ (oraz $\overline{RFSH}$, lecz nie widać tego na oscylogramie). W trakcie odświeżania dekodowany jest także kod pobranej instrukcji.
+Cały cykl można zaobserwować w bloku \square{red} na poniższym zdjęciu.
 
 \subsection{Cykl odczytu z pamięci}
 
