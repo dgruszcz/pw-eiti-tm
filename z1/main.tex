@@ -191,7 +191,7 @@ Schemat połączeń znajduje się poniżej oscylogramów. Nasz program do testow
 \section{Problemy}
 
 Podczas prób budowy zaprojektowanych układów natrafiliśmy na kilka problemów, które ostatecznie udało nam się rozwiązać.
-Jednym z nich były szybko zanikające sygnały. Było to spowodowane podłączeniem dwóch modułów BNC. Pomimo uzyskania prawidłowego działania układu sygnał $\overline{WAIT}$ był zbyt słaby, aby procesor mógł zauważyć jego zmiany- przez cały czas traktował jego stan jako niski. Aby uniknąć tej sytuacji podczas testowania układu korzystaliśmy z sond dołączonych do oscyloskopu.
+Jednym z nich były szybko zanikające sygnały. Spowodowało to podłączenie dwóch modułów BNC. Pomimo uzyskania prawidłowego działania układu sygnał $\overline{WAIT}$ był zbyt słaby, aby procesor mógł zauważyć jego zmiany- przez cały czas traktował jego stan jako niski. Aby uniknąć tej sytuacji podczas badania układu korzystaliśmy z sond dołączonych do oscyloskopu.
 Kolejnym problemem było podłączenie licznika do układu z zadania drugiego. Podczas testów okazało się, że sygnał przeniesienia znikał zbyt szybko, więc procesor nie zauważał zmiany sygnału $\overline{WAIT}$ i nie mógł zmienić stanu wyjść, wobec tego licznik zaczynał liczyć od zera. Powodowało to zatrzymanie procesora. Problem następował przy zliczaniu do 16. Znaleźliśmy dwa rozwiązania tego problemu, jednym było zliczanie do 8 i wykorzystanie najstarszego bitu jako bit przeniesienia lub użycie rejestru. Ostatecznie zdecydowaliśmy się na wykorzystanie drugiej opcji.
 
 
