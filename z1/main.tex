@@ -89,9 +89,7 @@ Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci r
 	\includegraphics[width=0.75\textwidth]{img/1a.png}
 	\caption{}
 \end{figure}
-
 \section{Generowanie sygnału opóźniającego}
-
 Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia po wykryciu \textbf{odczytu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
 
 Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy się na wykorzystanie multipleksera.
@@ -105,25 +103,16 @@ Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z mo
 
 Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzone do wejść bramki \textit{NAND}. W ten sposób otrzymaliśmy wymagany sygnał $\overline{WAIT}$.
 
-Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2. Poniżej znajduje się schemat funkcji generującej takty oczekiwania oraz przebiegi sygnałów dla ustawień przełącznika szesnastkowego 0, 1, 3, 7, 15 (wykresy kolejno (a), (b), (c), (d) oraz (e)). W kolorze \square{blue} widać funkcję $\overline{WAIT}$ generowaną przez nasz układ. Dla położenia 0 i 1 przełącznika szesnastkowego sygnały $\overline{IORQ}$ oraz $\overline{RD}$ nie ulegają wydłużeniu. Powodem jest traktowanie pierwszego taktu oczekiwania jako sygnał domyślny, generowany przez procesor. Dlatego też widoczna na oscylogramach (a) i (b) instrukcja odczytu z przestrzeni wejścia/wyjścia trwa 4 takty zegara. Na wykresach (c), (d) i (e) wyraźnie widać, że została przedłużona kolejno o jeden, dwa oraz trzy takty zegarowe.
+Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2.  W kolorze \square{blue} widać funkcję $\overline{WAIT}$ generowaną przez nasz układ. Dla położenia 0 i 1 przełącznika szesnastkowego sygnały $\overline{IORQ}$ oraz $\overline{RD}$ nie ulegają wydłużeniu. Powodem jest traktowanie pierwszego taktu oczekiwania jako sygnał domyślny, generowany przez procesor. Dlatego też widoczna na oscylogramach (a) i (b) instrukcja odczytu z przestrzeni wejścia/wyjścia trwa 4 takty zegara. Na wykresach (c), (d) i (e) wyraźnie widać, że została przedłużona kolejno o jeden, dwa oraz trzy takty zegarowe. Poniżej znajduje się schemat funkcji generującej takty oczekiwania oraz przebiegi sygnałów dla ustawień przełącznika szesnastkowego 0, 1, 3, 7, 15 (wykresy kolejno (a), (b), (c), (d) oraz (e)).
 
 
-%\lstinputlisting{src/2.lst}
-
-\begin{figure}[H]
-	\centering
-	\begin{subfigure}[b]{0.8\textwidth}
-		\includegraphics[width=\textwidth]{img/z2.png}
-		\caption{schemat do punktu 3.}
-  \end{subfigure}
-\end{figure}
 
 \begin{figure}[H]
 	\centering
 
 
-%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2a.png}}
-%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2b.png}}
+	%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2a.png}}
+	%	\subfloat[blabla]{\includegraphics[width=2.5in]{img/2b.png}}
 
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{img/2a.png}
@@ -133,6 +122,7 @@ Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2. Pon
 		\includegraphics[width=\textwidth]{img/2b.png}
 		\caption{}
 	\end{subfigure}
+	\centering
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{img/2c.png}
 		\caption{}
@@ -148,13 +138,29 @@ Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2. Pon
 	\caption{}
 \end{figure}
 
-\section{Wstrzymywanie pracy procesora}
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{img/z2.png}
+  \end{subfigure}
+	\caption{schemat do punktu 3}
+\end{figure}
 
+\section{Wstrzymywanie pracy procesora}
 Ostatnim zadaniem była modyfikacja poprzedniego układu w taki sposób, aby zamiast wstawiać takty oczekiwania, generować sygnał $\overline{WAIT}$ do momentu uzyskania zbocza przełącznika.
-Zdecydowaliśmy się zastąpić rejestr przerzutnikiem typu D, gdyż element zliczający nie był już potrzebny, a wystarczył prosty układ z pamięcią. Przerzutnik pozwalał nam też na trywialne wykrywanie zbocza przełączania przez podłączenie go do wejścia zegarowego.
-W normalnych warunkach (gdy procesor nie wpadał w pułapkę) przerzutnik był zerowany sygnałem \textit{M1}. Do wejścia D była podpięty stały sygnał wysoki, dzięki czemu zbocze przełącznika powodowało dezaktywację sygnału $\overline{WAIT}$ poprzez resetowanie wyjścia $\overline{Q}$ przerzutnika.
+Zdecydowaliśmy się zastąpić rejestr przerzutnikiem typu D, gdyż element zliczający nie był już potrzebny, a wystarczył prosty układ z pamięcią. Przerzutnik pozwalał nam też na wykrywanie zbocza przełączania przez podłączenie go do wejścia zegarowego.
+W normalnych warunkach (gdy procesor nie wpadał w pułapkę) przerzutnik był resetowany sygnałem \textit{M1} (na wyjściu $\overline{Q}$ pojawiał się sygnał $1$). Do wejścia D był podpięty stały sygnał wysoki, dzięki czemu zbocze przełącznika powodowało dezaktywację sygnału $\overline{WAIT}$ poprzez resetowanie wyjścia $\overline{Q}$ przerzutnika. Do wejścia $\overline{SET}$ przerzutnika był na stałe podłączony sygnał $1$, gdyż nie było potrzeby z niego korzystać.
 
 Układ multipleksera pozostawiliśmy bez zmian, natomiast do bramki \textit{NAND}, z której wychodzi sygnał $\overline{WAIT}$, zamiast najmniej znaczącego bitu rejestru podłączyliśmy wyjście $\overline{Q}$ przerzutnika.
+
+Następnie zmodyfikowaliśmy kod z poprzedniego zadania, aby było widać, że procesor jest zatrzymywany po każdym wystąpieniu warunku. Ten się nie zmienił, procesor wciąż miał być pułapkowany odcczytem z przestrzeni wejścia/wyjścia, więc dodaliśmy jedno polecenie IN, abby można było stwierdzić, że pułapkowanie następuje od razu po zwolnieniu z poprzedniego okresu oczekiwania i gdy są spełnione warunki zadania.
+
+Na rysunku $5$ widoczny jest proces wyzwalania procesora ze stanu oczekiwania, wykonianie trzech kolejnych instrukcji i ponowne wejście do stanu oczekiwania po napotkaniu drugiego polecenia IN. Rysunek $6$ pokazuje analogiczną sytuację. Na oscylogramie widać wyzwolenie ze stanu oczekiwania, wykonanie dwóch instrukcji oraz ponowne pułapkowanie po wykryciu polecenia IN.
+Wyraźnie widać, że nasz układ powoduje pułapkowanie procesora z każdym wykryciem instrukcji odczytu z przestrzeni wejścia/wyjścia, można również zidentyfikować, które polecenie wprwadziło procesor do tego stanu. Rysunek piąty przedstawia pułapkowanie w linii programu [\textit{IN A, (04h)}], rysunek 6 w linii programu [\textit{IN A, (0h)}].
+
+Schemat połączeń znajduje się poniżej oscylogramów. Nasz program do testowania zadania 3:
+
+\lstinputlisting{src/2.lst}
 
 %TODO: wstawić kod z zadania 3
 
@@ -173,6 +179,12 @@ Układ multipleksera pozostawiliśmy bez zmian, natomiast do bramki \textit{NAND
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.75\textwidth]{img/3c.png}
+	\caption{}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{img/z3.png}
 	\caption{}
 \end{figure}
 
