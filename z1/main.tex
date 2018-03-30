@@ -46,7 +46,8 @@
 Na pierwszym laboratorium mieliśmy za zadanie oswoić się z układem FPGA symulującym mikroprocesor Z80 przez rozpoznanie podstawowych instrukcji wejścia/wyjścia oraz pamięci. Ćwiczenie składało się z trzech punktów: przedstawienia podstawowych instrukcji na oscyloskopie, złożenia układu atywującego sygnał $\overline{WAIT}$ na zadaną ilość taktów po spełnieniu określonych warunków oraz zbudowania układu pułakpującego procesor w tym sygnale do czasu wyzwolenia przełącznikiem bistabilnym.
 
 %TODO: zrobić listę z wymienionych układów
-Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3: ${10\_PS1}$ (moduł zasilacza), ${100\_LED8}$ (zestaw 8 diod), ${13x\_IN6}$ (zestaw bistabilnych przełączników), ${202\_NAND}$ (zestaw bramek nand), ${380\_NOTx6}$ (moduł sześciu bramek negujących), ${451\_IN\_4xHEX}$ (zestaw przełączników szesnastkowych), ${331\_MUX-Dx2}$ (zestaw multiplekserów oraz przerzutników typu D), ${400\_74194x2}$ (moduł rejestrów przesuwnych) oraz procesora Z80 zrealizowanego na układzie FPGA. Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli podczas testowania programu, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć aplikację w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE, co uniemożliwiało identyfikację i analizę naszego programu.
+Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3: ${10\_PS1}$ (moduł zasilacza), ${100\_LED8}$ (zestaw 8 diod), ${13x\_IN6}$ (zestaw bistabilnych przełączników), ${202\_NAND}$ (zestaw bramek nand), ${380\_NOTx6}$ (moduł sześciu bramek negujących), ${451\_IN\_4xHEX}$ (zestaw przełączników szesnastkowych), ${331\_MUX-Dx2}$ (zestaw multiplekserów oraz przerzutników typu D), ${400\_74194x2}$ (moduł rejestrów przesuwnych) oraz procesora Z80 zrealizowanego na układzie FPGA.
+Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli podczas testowania programu, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć aplikację w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE, co uniemożliwiało identyfikację i analizę naszego programu.
 
 
 
@@ -91,20 +92,31 @@ Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci r
 
 \section{Generowanie sygnału opóźniającego}
 
-Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia po wykryciu \textbf{odczytywaniu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
+Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia po wykryciu \textbf{odczytu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
 
-Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy, że użyjemy multipleksera.
+Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy się na wykorzystanie multipleksera.
 
 % TODO: napisać o module SML-3 z rejestrem
-Do odliczania taktów zegara procesora zdecydowaliśmy się użyć rejestru przesuwnego z modułu SML-3. Pozwala on zliczyć maksymalnie 4 takty zegara, więc biorąc pod uwagę wbudowany takt oczekiwania byliśmy w stanie dodać maksymalnie 3 takty. ale było to wystarczające do wykonania zadania. Wejściem zegarowym rejestru był zanegowany sygnał zegarowy,ponieważ sygnał $\overline{WAIT}$ był próbkowany przez procesor podczas opadającego zbocza zegara, więc każde przesunięcie zawartości rejestru oznaczało wydłużenie sygnału opóźniającego o jeden takt.  Alternatywą do naszego rozwiązania było użycie licznika, lecz rejestr był rozwiązaniem prostszym.
+Do odliczania taktów zegara procesora zdecydowaliśmy się użyć rejestru przesuwnego z modułu SML-3 ${400\_74194x2}$. Pozwala on zliczyć maksymalnie 4 takty zegara, więc biorąc pod uwagę wbudowany takt oczekiwania byliśmy w stanie dodać maksymalnie 3 takty. Było to jednak wystarczające do wykonania zadania. Wejściem zegarowym rejestru był zanegowany sygnał zegarowy, ponieważ sygnał $\overline{WAIT}$ był próbkowany przez procesor podczas opadającego zbocza zegara, więc każde przesunięcie zawartości rejestru oznaczało wydłużenie sygnału opóźniającego o jeden takt.  Alternatywą do naszego rozwiązania było użycie licznika, lecz rejestr był rozwiązaniem prostszym.
 
-Ładowanie rejestru oraz przesuwanie odbywało się przez podłączenie do wejścia \textit{s0} sygnału $\overline{IORQ}$: w stanie wysokim następowało ładowanie rejestru, a w stanie niskim przesuwanie.
+Ładowanie rejestru oraz przesuwanie odbywało się przez podłączenie do wejścia \textit{S0} sygnału $\overline{IORQ}$: w stanie wysokim następowało ładowanie rejestru, a w stanie niskim przesuwanie.
 
-Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z modułu przełączników szesnastkowych IN\_4xHEX.
+Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z modułu przełączników szesnastkowych IN\_4xHEX. Ilość taktów była równoważna z ilością kolejnych jedynek w rejestrze patrząc od najmniej znaczącego bitu. Umożliwiło to późniejszą trywialną modyfikację zaadania, gdy mieliśmy wprowadzić przykładowo jeden dodatkowy tak oczekiwania. Liczba ładowana z przełączników była już uzupełniona o takt automatyczny, więc gdy ładowaliśmy do rejestru liczbę 3, Oznaczało to wprowadzenie dwóch taktów oczekiwania, z czego jeden był automatyczny. Uzyskiwaliśmy więc przedłużenie o jeden takt zegarowy.
 
 Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzone do wejść bramki \textit{NAND}. W ten sposób otrzymaliśmy wymagany sygnał $\overline{WAIT}$.
 
-\lstinputlisting{src/2.lst}
+Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2. Poniżej znajduje się schemat funkcji generującej takty oczekiwania oraz przebiegi sygnałów dla ustawień przełącznika szesnastkowego 0, 1, 3, 7, 15 (wykresy kolejno (a), (b), (c), (d) oraz (e)). W kolorze \square{blue} widać funkcję $\overline{WAIT}$ generowaną przez nasz układ. Dla położenia 0 i 1 przełącznika szesnastkowego sygnały $\overline{IORQ}$ oraz $\overline{RD}$ nie ulegają wydłużeniu. Powodem jest traktowanie pierwszego taktu oczekiwania jako sygnał domyślny, generowany przez procesor. Dlatego też widoczna na oscylogramach (a) i (b) instrukcja odczytu z przestrzeni wejścia/wyjścia trwa 4 takty zegara. Na wykresach (c), (d) i (e) wyraźnie widać, że została przedłużona kolejno o jeden, dwa oraz trzy takty zegarowe.
+
+
+%\lstinputlisting{src/2.lst}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{img/z2.png}
+		\caption{schemat do punktu 3.}
+  \end{subfigure}
+\end{figure}
 
 \begin{figure}[H]
 	\centering
