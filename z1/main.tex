@@ -46,12 +46,12 @@
 Na pierwszym laboratorium mieliśmy za zadanie oswoić się z układem FPGA symulującym mikroprocesor Z80 przez rozpoznanie podstawowych instrukcji wejścia/wyjścia oraz pamięci. Ćwiczenie składało się z trzech punktów: przedstawienia podstawowych instrukcji na oscyloskopie, złożenia układu atywującego sygnał $\overline{WAIT}$ na zadaną ilość taktów po spełnieniu określonych warunków oraz zbudowania układu pułakpującego procesor w tym sygnale do czasu wyzwolenia przełącznikiem bistabilnym.
 
 %TODO: zrobić listę z wymienionych układów
-Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3: ${10\_PS1}$ (moduł zasilacza), ${100\_LED8}$ (zestaw 8 diod), ${13x\_IN6}$ (zestaw bistabilnych przełączników), ${202\_NAND}$ (zestaw bramek nand z dodatkowymi bramkami negującymi), ${380\_NOTx6}$ (moduł sześciu bramek negujących), ${451\_IN\_4xHEX}$ (zestaw przełączników szesnastkowych), ${331\_MUX-Dx2}$ (zestaw multiplekserów oraz przerzutników typu D), ${400\_74194x2}$ (moduł rejestrów przesuwnych) oraz procesora Z80 zrealizowanego na układzie FPGA. Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli podczas testowania programu, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć aplikację w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE.
+Zaprojektowane przed laboratorium układy zbudowaliśmy z dostępnych układów SML-3: ${10\_PS1}$ (moduł zasilacza), ${100\_LED8}$ (zestaw 8 diod), ${13x\_IN6}$ (zestaw bistabilnych przełączników), ${202\_NAND}$ (zestaw bramek nand), ${380\_NOTx6}$ (moduł sześciu bramek negujących), ${451\_IN\_4xHEX}$ (zestaw przełączników szesnastkowych), ${331\_MUX-Dx2}$ (zestaw multiplekserów oraz przerzutników typu D), ${400\_74194x2}$ (moduł rejestrów przesuwnych) oraz procesora Z80 zrealizowanego na układzie FPGA. Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczególnych problemów. Programy pisane w Assembly dla procesora Z80 wgrywaliśmy z pomocą aplikacji NoICE, która umożliwiała sprawdzenie adresów i wielkości poszczególnych instrukcji oraz testowanie ich i uniknięcie nieskończonej pętli podczas testowania programu, od której jedyną ucieczką był reset procesora. Aby jednak uzyskać porządany wyraźny obraz na oscyloskopie, należało przełączyć aplikację w tryb RUN, gdyż w przeciwnym wypadku oscylogram pokazywał również polecenia wysyłane przez sam program NoICE, co uniemożliwiało identyfikację i analizę naszego programu.
 
 
 
 \section{Odczytywanie przebiegów instrukcji na oscyloskopie}
-Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapisywanie do pamięci, wczytywanie i zapisywanie do przestrzeni wejścia/wyjśćia oraz cykl pobierania kodu instrukcji.
+Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapis do pamięci, wczytywanie i zapis do przestrzeni wejścia/wyjśćia oraz cykl pobierania kodu instrukcji.
 W celu realizacji zadania napisaliśmy prosty program w Assembly Z80, który po uruchomieniu w aplikacji NoICE i włączeniu trybu RUN pozwalał na obserwację wyżej wymienionych przebiegów.
 
 \lstinputlisting{src/1.lst}
@@ -60,27 +60,28 @@ W celu realizacji zadania napisaliśmy prosty program w Assembly Z80, który po 
 \subsection{Cykl fetch}
 
 Na początku realizacji każdego polecenia mikroprocesor pobiera kod instrukcji, co jest sygnalizowane stanem niskim na wyjściach $\overline{MREQ}$, $\overline{RD}$ oraz $\overline{M1}$. Zaraz potem następuje odświeżenie pamięci sygnalizowane stanem niskim jedynie na wyjściu $\overline{MREQ}$ (oraz $\overline{RFSH}$, lecz nie widać tego na oscylogramie). W trakcie odświeżania dekodowany jest także kod pobranej instrukcji.
-Cały cykl można zaobserwować w bloku \square{red} na poniższym zdjęciu.
+Cały cykl można zaobserwować w bloku \square{red} na poniższym zdjęciu. Nieprzedłużony sygnałem $\overline{WAIT}$ trwa 4 cykle zegarowe.
 
 \subsection{Cykl odczytu z pamięci}
 
 Podczas tego cyklu zaznaczonego w bloku \square{cyan} następuje pobranie argumentów do wykonania polecenia OUT, a więc odczyt z pamięci.
-Sygnalizowane jest to niskim stanem na wyjściach $\overline{MREQ}$ i $\overline{RD}$
+Sygnalizowane jest to niskim stanem na wyjściach $\overline{MREQ}$ i $\overline{RD}$. Jej wykonanie trwa zwykle 3 cykle zegarowe.
 %TODO: sprawwdzić jakie to polecenie
 
 \subsection{Cykl zapisu do układów wejścia/wyjścia}
 
 Cykl zapisu do pamięci:
-Podczas cyklu zaznaczonego w bloku nr 5 następuje zapis do pamięci realizowany przez isntrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie).
+Podczas cyklu zaznaczonego w bloku nr 5 następuje zapis do pamięci realizowany przez isntrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Sygnał $\overline{WR}$ pojawia się na wyjściu procesora jeden cykl zegarowy po wystawieniu sygnału $\overline{MREQ}$, by dane na szynie zdążyły się ustabillizować. Cała instrukcja zapisu trwa zwykle 3 cykle zegarowe.
+
 
 
 \subsection{Cykl odczytu z przestrzeni wejścia/wyjścia}
 
-Podczas cyklu zaznaczonego w bloku \square{violet} następuje odczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowane jest to stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$.
 %TODO sprawdzić
+Podczas cyklu zaznaczonego w bloku \square{violet} następuje odczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowany jest stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$. Podczas wykonywania instrukcji z przestrzeni wejśćia/wyjścia w każdej instrukcji automatycznie jest wstawiany jeden cykl $\overline{WAIT}$. Jest to spowodowane późnym uaktywnieniem sygnału $\overline{IORQ}$ (jest aktywowany w drugim cyklu zegarowym), co uniemożliwia wystarczająco szybkie dekodowanie instrukcji i uaktywnienie sygnału $\overline{WAIT}$ w tym samym cyklu zegarowym. Z tego powodu ta instrukcja trwa zwykle 4 cykle zegarowe.
 
 \subsection{Cykl zapisu do pamięci}
-Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie).
+Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Również w tej instrukcji dodawany jest automatycznie sygnał ${WAIT}$, dlatego cykl zapisu w przestrzeni wejscia/wyjścia trwa zwykle 4 cykle zegarowe.
 
 \begin{figure}[H]
 	\centering
@@ -90,7 +91,7 @@ Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci r
 
 \section{Generowanie sygnału opóźniającego}
 
-Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia przy \textbf{odczytywaniu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
+Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia po wykryciu \textbf{odczytywaniu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
 
 Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy, że użyjemy multipleksera.
 
