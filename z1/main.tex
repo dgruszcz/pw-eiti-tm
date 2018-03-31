@@ -52,7 +52,7 @@ Schematy do zadania drugiego i trzeciego podane są podczas omawiania poszczegó
 
 
 \section{Odczytywanie przebiegów instrukcji na oscyloskopie}
-Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapis do pamięci, wczytywanie i zapis do przestrzeni wejścia/wyjśćia oraz cykl pobierania kodu instrukcji.
+Pierwsze zadanie polegało na obserwacji i opisie pięciu przebiegów sygnałów procesora: wczytywanie i zapis do pamięci, wczytywanie i zapis do przestrzeni wejścia/wyjścia oraz cykl pobierania kodu instrukcji.
 W celu realizacji zadania napisaliśmy prosty program w Assembly Z80, który po uruchomieniu w aplikacji NoICE i włączeniu trybu RUN pozwalał na obserwację wyżej wymienionych przebiegów.
 
 \lstinputlisting{src/1.lst}
@@ -82,24 +82,27 @@ Podczas cyklu zaznaczonego w bloku nr 5 następuje zapis do pamięci realizowany
 Podczas cyklu zaznaczonego w bloku \square{violet} następuje odczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowany jest stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$. Podczas wykonywania instrukcji z przestrzeni wejśćia/wyjścia w każdej instrukcji automatycznie jest wstawiany jeden cykl $\overline{WAIT}$. Jest to spowodowane późnym uaktywnieniem sygnału $\overline{IORQ}$ (jest aktywowany w drugim cyklu zegarowym), co uniemożliwia wystarczająco szybkie dekodowanie instrukcji i uaktywnienie sygnału $\overline{WAIT}$ w tym samym cyklu zegarowym. Z tego powodu ta instrukcja trwa zwykle 4 cykle zegarowe.
 
 \subsection{Cykl zapisu do pamięci}
-Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Również w tej instrukcji dodawany jest automatycznie sygnał ${WAIT}$, dlatego cykl zapisu w przestrzeni wejscia/wyjścia trwa zwykle 4 cykle zegarowe.
+Podczas cyklu zaznaczonego w bloku \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Również w tej instrukcji dodawany jest automatycznie sygnał $\overline{WAIT}$, dlatego cykl zapisu w przestrzeni wejscia/wyjścia trwa zwykle 4 cykle zegarowe.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.75\textwidth]{img/1a.png}
 	\caption{}
 \end{figure}
-\section{Generowanie sygnału opóźniającego}
-Naszym zdaniem było wstawianie \textbf{dwóch} taktów opóźnienia po wykryciu \textbf{odczytu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
 
-Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $1$, gdy był spełniony warunek z treści zadania lub $0$ w pozostałych przypadkach. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy się na wykorzystanie multipleksera.
+Z powyższego kodu można również wyczytać wielkości poszczególnych poleceń. instrukcja OUT ma jeden bajt kodu instrukcji oraz jeden bajt pobranego argumentu 0h, polecenie IN podczas instrukcji fetch również pobiera jeden bajt i jeden bajt argumentu 0h, natomiast polecenie LD pobiera jeden bajt kodu instrukcji i dwa bajty argumentów, najpierw mniej, następnie bardziej znaczący. Polecenie JR poza kodem instrukcji pobiera dodatkowo jeden bajt służący do obliczenia relatywnego skoku.
+
+\section{Generowanie sygnału opóźniającego}
+Naszym zdaniem było wstawianie \textbf{dwóch} dodatkowych taktów opóźnienia po wykryciu \textbf{odczytu danych z przestrzeni wejścia/wyjścia}. Procesor automatycznie wstawia jeden takt opóźnienia przy wykonywaniu instrukcji dotyczących tej przestrzeni, zatem łącznie mieliśmy uzyskać trzy takty opóźnienia.
+
+Pierwszą naszą czynnością było stworzenie funkcji logicznej, która przyjmowała wartość $\textbf{1}$, gdy był spełniony warunek z treści zadania i $\textbf{0}$ w przeciwnym przypadku. Następnie zaprojektowaliśmy układ kombinacyjny realizujący tę funkcję. Początkowo wykorzystaliśmy bramki \textit{NAND} oraz \textit{NOT}, ale ze względu na trudność modyfikacji oraz małą przejrzystość takiego układu finalnie zdecydowaliśmy się na wykorzystanie multipleksera.
 
 % TODO: napisać o module SML-3 z rejestrem
 Do odliczania taktów zegara procesora zdecydowaliśmy się użyć rejestru przesuwnego z modułu SML-3 ${400\_74194x2}$. Pozwala on zliczyć maksymalnie 4 takty zegara, więc biorąc pod uwagę wbudowany takt oczekiwania byliśmy w stanie dodać maksymalnie 3 takty. Było to jednak wystarczające do wykonania zadania. Wejściem zegarowym rejestru był zanegowany sygnał zegarowy, ponieważ sygnał $\overline{WAIT}$ był próbkowany przez procesor podczas opadającego zbocza zegara, więc każde przesunięcie zawartości rejestru oznaczało wydłużenie sygnału opóźniającego o jeden takt.  Alternatywą do naszego rozwiązania było użycie licznika, lecz rejestr był rozwiązaniem prostszym.
 
 Ładowanie rejestru oraz przesuwanie odbywało się przez podłączenie do wejścia \textit{S0} sygnału $\overline{IORQ}$: w stanie wysokim następowało ładowanie rejestru, a w stanie niskim przesuwanie.
 
-Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z modułu przełączników szesnastkowych IN\_4xHEX. Ilość taktów była równoważna z ilością kolejnych jedynek w rejestrze patrząc od najmniej znaczącego bitu. Umożliwiło to późniejszą trywialną modyfikację zaadania, gdy mieliśmy wprowadzić przykładowo jeden dodatkowy tak oczekiwania. Liczba ładowana z przełączników była już uzupełniona o takt automatyczny, więc gdy ładowaliśmy do rejestru liczbę 3, Oznaczało to wprowadzenie dwóch taktów oczekiwania, z czego jeden był automatyczny. Uzyskiwaliśmy więc przedłużenie o jeden takt zegarowy.
+Ilość wymaganych przez zadanie taktów zegara była ładowana do rejestru z modułu przełączników szesnastkowych IN\_4xHEX. Ilość taktów była równoważna z ilością kolejnych jedynek w rejestrze patrząc od najmniej znaczącego bitu. Umożliwiło to późniejszą trywialną modyfikację zadania, gdy mieliśmy wprowadzić przykładowo jeden dodatkowy tak oczekiwania. Liczba ładowana z przełączników była już uzupełniona o takt automatyczny, więc gdy ładowaliśmy do rejestru liczbę 3, Oznaczało to wprowadzenie dwóch taktów oczekiwania, z czego jeden był automatyczny. Uzyskiwaliśmy więc przedłużenie o jeden takt zegarowy.
 
 Wyjście multipleksera oraz najmniej znaczący bit rejestru zostały doprowadzone do wejść bramki \textit{NAND}. W ten sposób otrzymaliśmy wymagany sygnał $\overline{WAIT}$.
 
@@ -148,21 +151,19 @@ Podczas testowania złożonego układu korzystaliśmy z programu z punktu 2.  W 
 
 \section{Wstrzymywanie pracy procesora}
 Ostatnim zadaniem była modyfikacja poprzedniego układu w taki sposób, aby zamiast wstawiać takty oczekiwania, generować sygnał $\overline{WAIT}$ do momentu uzyskania zbocza przełącznika.
-Zdecydowaliśmy się zastąpić rejestr przerzutnikiem typu D, gdyż element zliczający nie był już potrzebny, a wystarczył prosty układ z pamięcią. Przerzutnik pozwalał nam też na wykrywanie zbocza przełączania przez podłączenie go do wejścia zegarowego.
-W normalnych warunkach (gdy procesor nie wpadał w pułapkę) przerzutnik był resetowany sygnałem \textit{M1} (na wyjściu $\overline{Q}$ pojawiał się sygnał $1$). Do wejścia D był podpięty stały sygnał wysoki, dzięki czemu zbocze przełącznika powodowało dezaktywację sygnału $\overline{WAIT}$ poprzez resetowanie wyjścia $\overline{Q}$ przerzutnika. Do wejścia $\overline{SET}$ przerzutnika był na stałe podłączony sygnał $1$, gdyż nie było potrzeby z niego korzystać.
+Zdecydowaliśmy się zastąpić rejestr przerzutnikiem typu D, gdyż element zliczający nie był już potrzebny, a wystarczył prosty układ z pamięcią. Przerzutnik pozwalał nam też na wykrywanie zbocza przełącznika przez podłączenie go do wejścia zegarowego.
+W normalnych warunkach (gdy procesor nie wpadał w pułapkę) przerzutnik był resetowany sygnałem \textit{M1} (na wyjściu $\overline{Q}$ pojawiał się sygnał $\textbf{1}$). Do wejścia D był podpięty stały sygnał wysoki, dzięki czemu zbocze przełącznika powodowało dezaktywację sygnału $\overline{WAIT}$ poprzez resetowanie wyjścia $\overline{Q}$ przerzutnika. Do wejścia $\overline{SET}$ przerzutnika był na stałe podłączony sygnał $\textbf{1}$, gdyż nie było potrzeby z niego korzystać.
 
-Układ multipleksera pozostawiliśmy bez zmian, natomiast do bramki \textit{NAND}, z której wychodzi sygnał $\overline{WAIT}$, zamiast najmniej znaczącego bitu rejestru podłączyliśmy wyjście $\overline{Q}$ przerzutnika.
+Układ multipleksera pozostawiliśmy bez zmian, natomiast do bramki \textit{NAND}, z której wychodzi sygnał $\overline{WAIT}$, zamiast najmniej znaczącego bitu rejestru z poprzedniego zadania podłączyliśmy wyjście $\overline{Q}$ przerzutnika.
 
 Następnie zmodyfikowaliśmy kod z poprzedniego zadania, aby było widać, że procesor jest zatrzymywany po każdym wystąpieniu warunku. Ten się nie zmienił, procesor wciąż miał być pułapkowany odcczytem z przestrzeni wejścia/wyjścia, więc dodaliśmy jedno polecenie IN, abby można było stwierdzić, że pułapkowanie następuje od razu po zwolnieniu z poprzedniego okresu oczekiwania i gdy są spełnione warunki zadania.
 
-Na rysunku $5$ widoczny jest proces wyzwalania procesora ze stanu oczekiwania, wykonianie trzech kolejnych instrukcji i ponowne wejście do stanu oczekiwania po napotkaniu drugiego polecenia IN. Rysunek $6$ pokazuje analogiczną sytuację. Na oscylogramie widać wyzwolenie ze stanu oczekiwania, wykonanie dwóch instrukcji oraz ponowne pułapkowanie po wykryciu polecenia IN.
+Na rysunku $5$. widoczny jest proces wyzwalania procesora ze stanu oczekiwania, wykonianie trzech kolejnych instrukcji i ponowne wejście do stanu oczekiwania po napotkaniu drugiego polecenia IN. Rysunek $6$. pokazuje analogiczną sytuację. Na oscylogramie widać wyzwolenie ze stanu oczekiwania, wykonanie dwóch instrukcji oraz ponowne pułapkowanie po wykryciu polecenia IN.
 Wyraźnie widać, że nasz układ powoduje pułapkowanie procesora z każdym wykryciem instrukcji odczytu z przestrzeni wejścia/wyjścia, można również zidentyfikować, które polecenie wprwadziło procesor do tego stanu. Rysunek piąty przedstawia pułapkowanie w linii programu [\textit{IN A, (04h)}], rysunek 6 w linii programu [\textit{IN A, (0h)}].
 
 Schemat połączeń znajduje się poniżej oscylogramów. Nasz program do testowania zadania 3:
 
 \lstinputlisting{src/2.lst}
-
-%TODO: wstawić kod z zadania 3
 
 \begin{figure}[H]
 	\centering
@@ -192,7 +193,7 @@ Schemat połączeń znajduje się poniżej oscylogramów. Nasz program do testow
 
 Podczas prób budowy zaprojektowanych układów natrafiliśmy na kilka problemów, które ostatecznie udało nam się rozwiązać.
 Jednym z nich były szybko zanikające sygnały. Spowodowało to podłączenie dwóch modułów BNC. Pomimo uzyskania prawidłowego działania układu sygnał $\overline{WAIT}$ był zbyt słaby, aby procesor mógł zauważyć jego zmiany- przez cały czas traktował jego stan jako niski. Aby uniknąć tej sytuacji podczas badania układu korzystaliśmy z sond dołączonych do oscyloskopu.
-Kolejnym problemem było podłączenie licznika do układu z zadania drugiego. Podczas testów okazało się, że sygnał przeniesienia znikał zbyt szybko, więc procesor nie zauważał zmiany sygnału $\overline{WAIT}$ i nie mógł zmienić stanu wyjść, wobec tego licznik zaczynał liczyć od zera. Powodowało to zatrzymanie procesora. Problem następował przy zliczaniu do 16. Znaleźliśmy dwa rozwiązania tego problemu, jednym było zliczanie do 8 i wykorzystanie najstarszego bitu jako bit przeniesienia lub użycie rejestru. Ostatecznie zdecydowaliśmy się na wykorzystanie drugiej opcji.
+Kolejnym problemem było podłączenie licznika do układu z zadania drugiego. Podczas testów okazało się, że sygnał przeniesienia znikał zbyt szybko, więc procesor nie zauważał zmiany sygnału naszej funkcji $\overline{WAIT}$ i nie mógł zmienić stanu wyjść, wobec tego licznik zaczynał liczyć od zera. Powodowało to zatrzymanie procesora. Problem następował przy zliczaniu do 16. Znaleźliśmy dwa rozwiązania tego problemu, jednym było zliczanie do 8 i wykorzystanie najstarszego bitu jako bit przeniesienia lub użycie rejestru. Ostatecznie zdecydowaliśmy się na wykorzystanie drugiej opcji.
 
 
 \end{document}
