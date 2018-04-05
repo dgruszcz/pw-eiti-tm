@@ -81,21 +81,21 @@ Cały cykl można zaobserwować w bloku \square{red} na rysunku \ref{fig:1a}. Ni
 
 \subsection{Cykl odczytu z pamięci}
 
-Podczas tego cyklu zaznaczonego w bloku \square{cyan} następuje pobranie argumentu operacji z pamięci.
-Sygnalizowane jest to niskim stanem na wyjściach $\overline{MREQ}$ i $\overline{RD}$. Jej wykonanie trwa zwykle 3 cykle zegarowe.
+Podczas cyklu zaznaczonego w bloku \square{cyan} następuje pobranie argumentu operacji z pamięci.
+Sygnalizowane jest to niskim stanem na wyjściach $\overline{MREQ}$ i $\overline{RD}$. Jego wykonanie trwa zwykle 3 cykle zegarowe.
 %TODO: sprawwdzić jakie to polecenie
 
 \subsection{Cykl zapisu do pamięci}
 
-Podczas cyklu \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Sygnał $\overline{WR}$ pojawia się na wyjściu procesora jeden cykl zegarowy po wystawieniu sygnału $\overline{MREQ}$, by dane na szynie zdążyły się ustabilizować. Cała instrukcja zapisu trwa zwykle 3 cykle zegarowe.
+Podczas cyklu \square{green} następuje zapis do pamięci realizowany przez instrukcję LD, sygnalizowane jest to stanem niskim na wyjściach $\overline{MREQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). Sygnał $\overline{WR}$ pojawia się na wyjściu procesora jeden cykl zegarowy po wystawieniu sygnału $\overline{MREQ}$, by dane na szynie zdążyły się ustabilizować. Całość trwa zwykle 3 cykle zegarowe.
 
 \subsection{Cykl odczytu z przestrzeni wejścia/wyjścia}
 
-Podczas cyklu zaznaczonego w bloku \square{violet} następuje odczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowany jest stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$. Podczas wykonywania instrukcji z przestrzeni wejścia/wyjścia automatycznie jest wstawiany jeden cykl $\overline{WAIT}$. Jest to spowodowane późnym uaktywnieniem sygnału $\overline{IORQ}$ (jest aktywowany w drugim cyklu zegarowym), co uniemożliwia wolniejszym układom zewnętrznym na wystarczająco szybką reakcję i uaktywnienie przez nie sygnału $\overline{WAIT}$ w tym samym cyklu zegarowym tak, by został on wykryty przez mikroprocesor. Z tego powodu ta instrukcja trwa zwykle 4 cykle zegarowe.
+Podczas cyklu zaznaczonego w bloku \square{violet} następuje odczyt z układów wejścia/wyjścia realizowany przez instrukcję IN, sygnalizowany jest stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{RD}$. Podczas wykonywania instrukcji z przestrzeni wejścia/wyjścia automatycznie jest wstawiany jeden cykl $\overline{WAIT}$. Jest to spowodowane późnym uaktywnieniem sygnału $\overline{IORQ}$ (jest aktywowany w drugim cyklu zegarowym), co uniemożliwia wolniejszym układom zewnętrznym na wystarczająco szybką reakcję i uaktywnienie przez nie sygnału $\overline{WAIT}$ w tym samym cyklu zegarowym tak, by został on wykryty przez mikroprocesor. Z tego powodu odczyt z przestrzeni wejścia/wyjścia trwa zwykle 4 cykle zegarowe.
 
 \subsection{Cykl zapisu do układów wejścia/wyjścia}
 
-Podczas cyklu zaznaczonego w bloku \square{yellow} następuje zapis do układów wejścia/wyjścia realizowany przez instrukcję OUT, sygnalizowane jest to stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). W tej instrukcji dodawany jest automatycznie sygnał $\overline{WAIT}$, dlatego cykl zapisu w przestrzeni wejścia/wyjścia trwa zwykle 4 cykle zegarowe.
+Podczas cyklu zaznaczonego w bloku \square{yellow} następuje zapis do układów wejścia/wyjścia realizowany przez instrukcję OUT, sygnalizowane jest to stanem niskim na wyjściach $\overline{IORQ}$ i $\overline{WR}$ ($\overline{WR}$ nie jest widoczne na oscylogramie). W cylku tym dodawany jest automatycznie sygnał $\overline{WAIT}$, dlatego trwa on zwykle 4 cykle zegarowe.
 
 Z powyższego kodu można również wyczytać wielkości poszczególnych poleceń. instrukcja OUT ma jeden bajt kodu instrukcji oraz jeden bajt pobranego argumentu 0h, polecenie IN podczas instrukcji fetch również pobiera jeden bajt i jeden bajt argumentu 0h, natomiast polecenie LD pobiera jeden bajt kodu instrukcji i jeden dwubajtowy argument, (najpierw mniej, następnie bardziej znaczące bity adresu 1900h). Polecenie JR poza kodem instrukcji pobiera dodatkowo jeden bajt służący do obliczenia relatywnego skoku.
 
