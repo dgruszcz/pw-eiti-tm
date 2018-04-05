@@ -184,8 +184,6 @@ Następnie zmodyfikowaliśmy kod z poprzedniego zadania, tak by było widać, ż
 Na rysunku $5$. widoczny jest proces wyzwalania procesora ze stanu oczekiwania, wykonanie kilku instrukcji (dokończenie poprzedniej instrukcji \textit{IN}, wykonanie instrukcji \textit{OUT} i \textit{LD} oraz rozpoczęcie kolejnej instrukcji \textit{IN}) i ponowne wejście do stanu oczekiwania w momencie odczytu z przestrzeni wejścia/wyjścia. Rysunek $6$. pokazuje analogiczną sytuację, z tym że w tym przypadku po wyjściu z pułapki zamiast instrukcji \textit{OUT} i \textit{LD} wykonywana jest instrukcja \textit{JR}.
 Wyraźnie widać, że procesor pułapkowany jest z każdym wykryciem instrukcji odczytu z przestrzeni wejścia/wyjścia, można również zidentyfikować, które polecenie wprowadziło procesor do tego stanu. Rysunek piąty przedstawia pułapkowanie w linii programu [\textit{IN A, (04h)}], rysunek 6 w linii programu [\textit{IN A, (0h)}].
 
-Schemat połączeń znajduje się poniżej oscylogramów.
-
 Program, który wykorzystaliśmy do testowania zadania 3:
 
 \lstinputlisting{src/2.lst}
