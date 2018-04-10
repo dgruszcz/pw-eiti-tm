@@ -3,7 +3,7 @@
 
 	DS 0x1838-$, 0
 
-isr:                        ; ISR -- zerowanie licznika
+isr:
 	PUSH     AF
 	CALL     clear
 	POP      AF
@@ -16,9 +16,9 @@ init:
 	LD   SP, 1FFFh
 	IM   1
 	CALL clear
-	LD   C, 0              ; licznik, debouncing
-	LD   D, 0              ; stan automatu
-	LD   E, 0              ; stan przycisku (do usunięcia, patrz linia 26)
+	LD   C, 0
+	LD   D, 0
+	LD   E, 0
 
 loop:
 	EI
@@ -97,7 +97,7 @@ disp:
 clear:
 	LD   B, 0
 	LD   C, 0
-	LD   D, 0
+	LD   D, 2
 	LD   A, 255
 	CALL disp
 	RET
