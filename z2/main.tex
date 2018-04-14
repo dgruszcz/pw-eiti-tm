@@ -50,19 +50,19 @@ Dodatkowym wymogamiem zadania była realizacja programowej eliminacji drgań sty
 
 Projektowanie licznika rozpoczęliśmy od stworzenia grafu stanów, który uwzględniał aktywną eliminację drgań styków przycisku zliczającego.
 Graf składa się z 4 stanów. W statnie początkowym układ oczekuje na wciśnięcie przycisku, w stanie drugim eliminowane są drgania związanie z wciśnięciem przycisku, w statnie trzeciem układ oczekuje na puszczenie przycisku, w stanie 4 eleminowane są drgania związanie z puszczeniem przycisku.
-%TODO ogarnąć grafu
+%TODO ogarnąć grafuu
 
 
 Następnie na podstawie grafu powstał kod napisany w języku Assembly.
-%TODO ogarnąc listing oraz trzeba będzie zrobić opis
-
+%TODO  trzeba będzie zrobić opis
+\lstinputlisting{src/main.lst}
 
 Schemat połączeń wygląda następująco:
 %TODO wstawić Schemat
 
 
 Przycisk odpowiedzialny za zliczanie został podłączony do wejścia D0 rejestru wejściowego C, natomiast przyisk odpowiedzialny za asynchroniczne zerowanie do wejścia $\overline{INT}$ procesora.
-Wyświetlanie zawartości licznika odbywa się za pomocą rejestu wyjściowego A, którego wyjścia podłączone są do modułu diod (wstawić jakie to diody). Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejest B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
+Wyświetlanie zawartości licznika odbywa się za pomocą rejestu wyjściowego A, którego wyjścia podłączone są do modułu diod SML-3 $\textbf{100\_LED8}$. Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejest B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
 
 
 \section{Poblemy}
