@@ -46,6 +46,17 @@ Na drugim laboratorium mieliśmy za zadanie zaprojektować i zrealizować liczni
 Sterowanie licznikiem miało odbywać się za pomocą dwóch przycisków (CLK aktywne zboczem oraz CLR aktywne poziomem).
 Dodatkowym wymogamiem zadania była realizacja programowej eliminacji drgań styków oraz zerowania licznika za pomocą przerwania maskowalnego.
 
+Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układów SML-3:
+
+\begin{itemize}
+	\item \textbf{10\_PS1} (moduł zasilacza)
+	\item \textbf{100\_LED8} (zestaw 8 diod)
+	\item \textbf{120\_IN8} (zestaw 8 monostabilnych wyłączników)
+	\item \textbf{202\_NAND} (zestaw bramek \textit{NAND})
+	\item \textbf{380\_NOTx6} (moduł sześciu bramek negujących)
+	\item procesor Z80 zrealizowany w układzie FPGA
+\end{itemize}
+
 \section{Implementacja licznika}
 
 Projektowanie licznika rozpoczęliśmy od stworzenia grafu stanów, który uwzględniał aktywną eliminację drgań styków przycisku zliczającego.
@@ -62,7 +73,7 @@ Schemat połączeń wygląda następująco:
 
 
 Przycisk odpowiedzialny za zliczanie został podłączony do wejścia D0 rejestru wejściowego C, natomiast przyisk odpowiedzialny za asynchroniczne zerowanie do wejścia $\overline{INT}$ procesora.
-Wyświetlanie zawartości licznika odbywa się za pomocą rejestu wyjściowego A, którego wyjścia podłączone są do modułu diod SML-3 $\textbf{100\_LED8}$. Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejest B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
+Wyświetlanie zawartości licznika odbywa się za pomocą rejestu wyjściowego A, którego wyjścia podłączone są do modułu diod SML-3 $\textit{100\_LED8}$. Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejest B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
 
 
 \section{Poblemy}
