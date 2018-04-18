@@ -1,0 +1,21 @@
+digraph {
+    graph [pad="0.5", nodesep="1", bgcolor="#fdf6e3"]
+    node [color="#002b36", fontcolor="#073642"]
+    edge [fontsize="10"]
+    
+    z0  [label="Z0"]
+    z1  [label="Z1"]
+    z2  [label="Z2"]
+    z3  [label="Z3"]
+
+    z0 -> z1 [label="E.0 == 0 \n ──────────", color="#b58900", fontcolor="#b58900"]
+    z1 -> z2 [label="C == 250 \n ────────── \n C=0, B++", color="#cb4b16", fontcolor="#cb4b16"]
+    z2 -> z3 [label="E.0 == 1 \n ──────────", color="#dc322f", fontcolor="#dc322f"]
+    z3 -> z0 [label="C == 250 \n ────────── \n C=0", color="#d33682", fontcolor="#d33682", constraint="false"]
+    
+    z1:w -> z1:w [label="E.0 == 0 && C != 250 \n ────────── \n C++", color="#6c71c4", fontcolor="#6c71c4", constraint="false"]
+    z3:w -> z3:w [label="E.0 == 1 && C != 250 \n ────────── \n C++", color="#268bd2", fontcolor="#268bd2", constraint="false"]
+    
+    z1 -> z0 [label="E.0 == 1 \n ────────── \n C=0", color="#2aa198", fontcolor="#2aa198", constraint="false"]
+    z3 -> z2 [label="E.0 == 0 \n ────────── \n C=0", color="#859900", fontcolor="#859900", constraint="false"]
+}
