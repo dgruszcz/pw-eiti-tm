@@ -4,9 +4,7 @@
 	DS 0x1838-$, 0
 
 isr:
-	PUSH     AF
 	CALL     clear
-	POP      AF
 	EI
 	RET
 
@@ -16,16 +14,12 @@ init:
 	LD   SP, 1FFFh
 	IM   1
 	CALL clear
-	LD   C, 0
-	LD   D, 0
-	LD   E, 0
+	EI
 
 loop:
-	EI
 	IN   A, (0)
 	LD   E, A
 	LD   A, D
-	CALL disp
 
 s0:
 	CP  0
@@ -45,11 +39,13 @@ s1:
 	INC C
 	DI
 	LD  A, C
-	CP  250
+	CP  255
 	JR  NZ, loop
+	INC B
+	CALL disp
+	EI
 	LD  C, 0
 	LD  D, 2
-	INC B
 	JR  loop
 
 s1_released:
@@ -63,7 +59,6 @@ s2:
 	LD  A, E
 	BIT 0, A
 	JR  Z, loop
-	LD  C, 0
 	LD  D, 3
 	JR  loop
 
@@ -75,7 +70,7 @@ s3:
 	JR  Z, s3_pushed
 	INC C
 	LD  A, C
-	CP  250
+	CP  255
 	JR  NZ, loop
 	LD  C, 0
 	LD  D, 0
@@ -98,6 +93,5 @@ clear:
 	LD   B, 0
 	LD   C, 0
 	LD   D, 2
-	LD   A, 255
 	CALL disp
 	RET
