@@ -17,6 +17,7 @@ init:
 	EI
 
 loop:
+	EI
 	IN   A, (0)
 	LD   E, A
 	LD   A, D
@@ -43,7 +44,6 @@ s1:
 	JR  NZ, loop
 	INC B
 	CALL disp
-	EI
 	LD  C, 0
 	LD  D, 2
 	JR  loop
