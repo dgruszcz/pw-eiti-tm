@@ -5,102 +5,96 @@
 1802 0x00...			DS 0x1838-$, 0 
 1838			 
 1838			isr: 
-1838 f5				PUSH     AF 
-1839 cd d2 18			CALL     clear 
-183c f1				POP      AF 
-183d fb				EI 
-183e c9				RET 
-183f			 
-183f 0x00...			DS 0x1860-$, 0 
+1838 cd cb 18			CALL     clear 
+183b fb				EI 
+183c c9				RET 
+183d			 
+183d 0x00...			DS 0x1860-$, 0 
 1860			 
 1860			init: 
 1860 31 ff 1f			LD   SP, 1FFFh 
 1863 ed 56			IM   1 
-1865 cd d2 18			CALL clear 
-1868 0e 00			LD   C, 0 
-186a 16 00			LD   D, 0 
-186c 1e 00			LD   E, 0 
+1865 cd cb 18			CALL clear 
+1868 fb				EI 
+1869			 
+1869			loop: 
+1869 fb				EI 
+186a db 00			IN   A, (0) 
+186c 5f				LD   E, A 
+186d 7a				LD   A, D 
 186e			 
-186e			loop: 
-186e fb				EI 
-186f db 00			IN   A, (0) 
-1871 5f				LD   E, A 
-1872 7a				LD   A, D 
-1873 cd ca 18			CALL disp 
-1876			 
-1876			s0: 
-1876 fe 00			CP  0 
-1878 20 09			JR  NZ, s1 
-187a 7b				LD  A, E 
-187b cb 47			BIT 0, A 
-187d 20 ef			JR  NZ, loop 
-187f 16 01			LD  D, 1 
-1881 18 eb			JR  loop 
-1883			 
-1883			s1: 
-1883 fe 01			CP  1 
-1885 20 19			JR  NZ, s2 
-1887 7b				LD  A, E 
-1888 cb 47			BIT 0, A 
-188a 20 0e			JR  NZ, s1_released 
-188c 0c				INC C 
-188d f3				DI 
-188e 79				LD  A, C 
-188f fe fa			CP  250 
-1891 20 db			JR  NZ, loop 
-1893 0e 00			LD  C, 0 
-1895 16 02			LD  D, 2 
-1897 04				INC B 
-1898 18 d4			JR  loop 
-189a			 
-189a			s1_released: 
-189a 0e 00			LD C, 0 
-189c 16 00			LD D, 0 
-189e 18 ce			JR loop 
-18a0			 
-18a0			s2: 
-18a0 fe 02			CP  2 
-18a2 20 0b			JR  NZ, s3 
-18a4 7b				LD  A, E 
-18a5 cb 47			BIT 0, A 
-18a7 28 c5			JR  Z, loop 
-18a9 0e 00			LD  C, 0 
-18ab 16 03			LD  D, 3 
-18ad 18 bf			JR  loop 
-18af			 
-18af			s3: 
-18af fe 03			CP  3 
-18b1 20 bb			JR  NZ, loop 
-18b3 7b				LD  A, E 
-18b4 cb 47			BIT 0, A 
-18b6 28 0c			JR  Z, s3_pushed 
-18b8 0c				INC C 
-18b9 79				LD  A, C 
-18ba fe fa			CP  250 
-18bc 20 b0			JR  NZ, loop 
-18be 0e 00			LD  C, 0 
-18c0 16 00			LD  D, 0 
-18c2 18 aa			JR  loop 
-18c4			 
-18c4			s3_pushed: 
-18c4 0e 00			LD C, 0 
-18c6 16 02			LD D, 2 
-18c8 18 a4			JR loop 
-18ca			 
-18ca			disp: 
-18ca f5				PUSH AF 
-18cb 78				LD   A, B 
-18cc e6 0f			AND  0fh 
-18ce d3 00			OUT  (0), A 
-18d0 f1				POP  AF 
-18d1 c9				RET 
-18d2			 
-18d2			clear: 
-18d2 06 00			LD   B, 0 
-18d4 0e 00			LD   C, 0 
-18d6 16 02			LD   D, 2 
-18d8 3e ff			LD   A, 255 
-18da cd ca 18			CALL disp 
-18dd c9				RET 
+186e			s0: 
+186e fe 00			CP  0 
+1870 20 09			JR  NZ, s1 
+1872 7b				LD  A, E 
+1873 cb 47			BIT 0, A 
+1875 20 f2			JR  NZ, loop 
+1877 16 01			LD  D, 1 
+1879 18 ee			JR  loop 
+187b			 
+187b			s1: 
+187b fe 01			CP  1 
+187d 20 1c			JR  NZ, s2 
+187f 7b				LD  A, E 
+1880 cb 47			BIT 0, A 
+1882 20 11			JR  NZ, s1_released 
+1884 0c				INC C 
+1885 f3				DI 
+1886 79				LD  A, C 
+1887 fe ff			CP  255 
+1889 20 de			JR  NZ, loop 
+188b 04				INC B 
+188c cd c3 18			CALL disp 
+188f 0e 00			LD  C, 0 
+1891 16 02			LD  D, 2 
+1893 18 d4			JR  loop 
+1895			 
+1895			s1_released: 
+1895 0e 00			LD C, 0 
+1897 16 00			LD D, 0 
+1899 18 ce			JR loop 
+189b			 
+189b			s2: 
+189b fe 02			CP  2 
+189d 20 09			JR  NZ, s3 
+189f 7b				LD  A, E 
+18a0 cb 47			BIT 0, A 
+18a2 28 c5			JR  Z, loop 
+18a4 16 03			LD  D, 3 
+18a6 18 c1			JR  loop 
+18a8			 
+18a8			s3: 
+18a8 fe 03			CP  3 
+18aa 20 bd			JR  NZ, loop 
+18ac 7b				LD  A, E 
+18ad cb 47			BIT 0, A 
+18af 28 0c			JR  Z, s3_pushed 
+18b1 0c				INC C 
+18b2 79				LD  A, C 
+18b3 fe ff			CP  255 
+18b5 20 b2			JR  NZ, loop 
+18b7 0e 00			LD  C, 0 
+18b9 16 00			LD  D, 0 
+18bb 18 ac			JR  loop 
+18bd			 
+18bd			s3_pushed: 
+18bd 0e 00			LD C, 0 
+18bf 16 02			LD D, 2 
+18c1 18 a6			JR loop 
+18c3			 
+18c3			disp: 
+18c3 f5				PUSH AF 
+18c4 78				LD   A, B 
+18c5 e6 0f			AND  0fh 
+18c7 d3 00			OUT  (0), A 
+18c9 f1				POP  AF 
+18ca c9				RET 
+18cb			 
+18cb			clear: 
+18cb 06 00			LD   B, 0 
+18cd 0e 00			LD   C, 0 
+18cf 16 02			LD   D, 2 
+18d1 cd c3 18			CALL disp 
+18d4 c9				RET 
 # End of file main.asm
-18de
+18d5
