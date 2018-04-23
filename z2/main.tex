@@ -93,7 +93,7 @@ W procedurze \textit{s1} program sprawdza, czy przycisk jest wciąż wciśnięty
 
 W procedurze \textit{s2} program sprawdza, czy aktualny stan przycisku uległ zmianie. Jeśli wciąż jest wciśnięty następuje powrót do początku pętli. Jeśli styki zostały rozwarte, następuje przejście do stanu \textbf{S3}. Procedura \textit{s3} jest analogiczna do \textit{s1}. Następuje porównanie najmłodszych bitów akumulatora oraz rejestru E, jeśli został wciśnięty, następuje powrót do stanu \textbf{S2}, jeśli w rejestrze C znajdzie się liczba 255, jest on resetowany, program ustawia stan \textbf{S0} i wraca do początku pętli głównej.
 
-Sekcja krytyczna znajduje się w miejscu inkrementacji licznika głównego. Gdyby w stanie \textbf{S1} tuż przed porównaniem wartości rejestru C z wartością 255 nastąpiło przerwanie, które zmienia zawartość akumulatora,po jego zakończeniu mogłaby zostać przyrównana inna wartość, powodując błąd w programie. 
+Sekcja krytyczna znajduje się w miejscu inkrementacji licznika głównego. Gdyby w stanie \textit{s1} tuż przed porównaniem wartości rejestru C z wartością 255 nastąpiło przerwanie, które zmienia zawartość akumulatora,po jego zakończeniu mogłaby zostać przyrównana inna wartość, powodując błąd w wyświetlaniu odpowiedniej wartości licznika. Sekcja krytyczna znajduje się również w procedurze \textit{disp}, gdzie w czasie przerwania mógłaby ulec zmianie zawartość rejestru B i zostałaby wyświetlona ponownie zła wartość licznika.
 
 \pagebreak
 
