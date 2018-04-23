@@ -14,6 +14,7 @@
 \usepackage{transparent}
 \usepackage{listings}
 \usepackage[colorlinks=true, linkcolor=blue, pdfborder={0 0 0}]{hyperref}
+\usepackage{courier}
 
 \renewcommand\thesection{\arabic{section}.}
 \renewcommand\thesubsection{\alph{subsection})}
@@ -25,6 +26,8 @@
 \brokenpenalty=1000
 \clubpenalty=1000
 \widowpenalty=1000
+
+\lstset{basicstyle=\ttfamily}
 
 \title{TM -- Laboratorium 2. \\ \large Licznik 4-bitowy – zerowanie, zliczanie w górę – kod NKB}
 \author{Krystian Chachuła \\ Dawid Gruszczyński \\ Marcin Skrzypkowski}
@@ -89,5 +92,5 @@ Wyświetlanie zawartości licznika odbywa się za pomocą rejestru wyjściowego
 
 
 \section{Problemy}
-W trakcie pracy nad licznikiem natrafiliśmy na problem związany z organizacją kodu w przestrzeni pamięciowej procesora Z80 (dobrze to sformułowałem? xD), napisany przez nas kod wykorzystujący (polecenie/dyrektywę czy jak to się zwie) ORG /adres/ w celu umieszczenia bloku kodu w oddzielnym miejscu w pamięci nie było uwzględniane w pliku kompilacyjnym (proszę poprawcie wszystko co napisałem źle, kompletnie się na tym nie znam xD), przez co cały sklejony kod lądował pod adresem 1800h. Rozwiązaliśmy ten problem za pomocą zapełniania komórek pamięci zerami (kodami instrukcji NOP), pozwoliło nam to na odpowiednią organizację kodu w pamięci, ponieważ niewykorzystywane przez nas komórki pamięci np. pomiędzy adresem 1802h a 1838h po zapełnieniu zerami za pomocą instrukcji DS cośtam pozwoliły na zapisanie kodu obsługi przerwania w odpowiednim miejscu (pod adresem 1838h).
+W trakcie pracy nad licznikiem natrafiliśmy na problem związany z organizacją programu w przestrzeni pamięciowej procesora Z80. Aby zdefiniować procedurę obsługi przerwania (tryb 1.) użyliśmy w kodzie polecenia \lstinline|ORG 1838h|, lecz po złożeniu i konwersji przez narzędzie \textit{bin2hex} program nie zachowywał się zgodnie z naszymi oczekiwaniami. Poleceniem którego szukaliśmy było \lstinline|DS 0x1838-$, 0|, które wypełnia bajty do adresu 1838 zerami (instrukcjami \lstinline|NOP|). Dzięki temu następne linie kodu były wykonywane jako \textit{ISR}.
 \end{document}
