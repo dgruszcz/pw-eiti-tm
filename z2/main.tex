@@ -83,8 +83,12 @@ Następnie na podstawie grafu powstał kod napisany w języku Assembly.
 	\lstinputlisting[firstline=51]{src/main.lst}
 \end{minipage}\hfill
 
-Schemat połączeń wygląda następująco:
-%TODO wstawić Schemat
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/schematic.pdf}
+	\caption{Schemat układu}
+	\label{fig:schematic}
+\end{figure}
 
 
 Przycisk odpowiedzialny za zliczanie został podłączony do wejścia D0 rejestru wejściowego C, natomiast przycisk odpowiedzialny za asynchroniczne zerowanie do wejścia $\overline{INT}$ procesora.
