@@ -97,6 +97,10 @@ W stanie \textit{s0} następuje załadowanie do akumulatora aktualnego stanu prz
 W punkcie \textit{s1} program sprawdza, czy przycisk jest wciąż wciśnięty. jeśli nie jest, następuje reset licznika C, a program wraca do stanu \textbf{Z0}. Jeśli styki wciąż są zwarte, rejestr C jest inkrementowany, następuje sprawdzenie, czy rejestr C doliczył do 255. Jeśli nie, wykonany zostaje skok do początku pętli, jeśli tak, zostaje zinkrementowany licznik główny B i wyświetlana jest nowa jego wartośc, zresetowany rejestr C oraz zmieniony stan automatu na \textbf{Z2}.\\
 W punkcie \textit{s2} program sprawdza, czy aktualny stan przycisku uległ zmianie. Jeśli wciąż jest wciśnięty następuje powrót do początku pętli. Jeśli styki zostały rozwarte, następuje przejście do stanu \textbf{Z3}.\\
 Punkt \textit{s3} jest analogiczny do \textit{s1}. Następuje porównanie najmłodszych bitów akumulatora oraz rejestru E, jeśli został wciśnięty, następuje powrót do stanu \textbf{Z2}, jeśli w rejestrze C znajdzie się liczba 255, jest on restowany, program ustawia stan \textbf{s0} i wraca do początku pętli głównej.
+
+\textbf{Sekcja krytyczna}
+\\
+Sekcja krytyczna znajduje się w miejscu inkrementacji licznika głównego. Gdyby w stanie \textit{s1} tuż przed porównaniem wartości rejestru C z wartością 255 nastąpiło przerwanie, które zmienia zawartość akumulatora,po jego zakończeniu mogłaby zostać przyrównana inna wartość, powodując błąd w programie. 
 %TODO: opis sekcji krytycznej
 \begin{figure}[H]
 	\centering
