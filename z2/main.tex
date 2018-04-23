@@ -5,7 +5,7 @@
 \usepackage[polish]{babel}
 \usepackage{parskip}
 \usepackage{icomma}
-\usepackage[a4paper,includeheadfoot,margin=2.54cm]{geometry}
+\usepackage[a4paper,includeheadfoot,margin=1.27cm]{geometry}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -65,8 +65,14 @@ Graf składa się z 4 stanów. W statnie początkowym układ oczekuje na wciśni
 
 
 Następnie na podstawie grafu powstał kod napisany w języku Assembly.
+
 %TODO  trzeba będzie zrobić opis
-\lstinputlisting{src/main.lst}
+\noindent\begin{minipage}{.45\textwidth}
+	\lstinputlisting[lastline=50]{src/main.lst}
+\end{minipage}\hfill
+\noindent\begin{minipage}{.45\textwidth}
+	\lstinputlisting[firstline=51]{src/main.lst}
+\end{minipage}\hfill
 
 Schemat połączeń wygląda następująco:
 %TODO wstawić Schemat
