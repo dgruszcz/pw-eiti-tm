@@ -44,7 +44,7 @@
 
 Na drugim laboratorium mieliśmy za zadanie zaprojektować i zrealizować licznik zliczający w górę w kodzie NKB z możliwością asynchronicznego zerowania jego zawartości.
 Sterowanie licznikiem miało odbywać się za pomocą dwóch przycisków (CLK aktywne zboczem oraz CLR aktywne poziomem).
-Dodatkowym wymogamiem zadania była realizacja programowej eliminacji drgań styków oraz zerowania licznika za pomocą przerwania maskowalnego.
+Dodatkowym wymogiem zadania była realizacja programowej eliminacji drgań styków oraz zerowania licznika za pomocą przerwania maskowalnego.
 
 Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układów SML-3:
 
@@ -60,7 +60,7 @@ Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układ�
 \section{Implementacja licznika}
 
 Projektowanie licznika rozpoczęliśmy od stworzenia grafu stanów, który uwzględniał aktywną eliminację drgań styków przycisku zliczającego.
-Graf składa się z 4 stanów. W statnie początkowym układ oczekuje na wciśnięcie przycisku, w stanie drugim eliminowane są drgania związanie z wciśnięciem przycisku, w statnie trzeciem układ oczekuje na puszczenie przycisku, w stanie 4 eleminowane są drgania związanie z puszczeniem przycisku.
+Graf składa się z 4 stanów. W stanie początkowym układ oczekuje na wciśnięcie przycisku, w stanie drugim eliminowane są drgania związanie z wciśnięciem przycisku, w stanie trzecim układ oczekuje na puszczenie przycisku, w stanie 4 eliminowane są drgania związanie z puszczeniem przycisku.
 %TODO ogarnąć grafuu
 
 \begin{figure}[H]
@@ -84,10 +84,10 @@ Schemat połączeń wygląda następująco:
 %TODO wstawić Schemat
 
 
-Przycisk odpowiedzialny za zliczanie został podłączony do wejścia D0 rejestru wejściowego C, natomiast przyisk odpowiedzialny za asynchroniczne zerowanie do wejścia $\overline{INT}$ procesora.
-Wyświetlanie zawartości licznika odbywa się za pomocą rejestu wyjściowego A, którego wyjścia podłączone są do modułu diod SML-3 $\textit{100\_LED8}$. Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejest B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
+Przycisk odpowiedzialny za zliczanie został podłączony do wejścia D0 rejestru wejściowego C, natomiast przycisk odpowiedzialny za asynchroniczne zerowanie do wejścia $\overline{INT}$ procesora.
+Wyświetlanie zawartości licznika odbywa się za pomocą rejestru wyjściowego A, którego wyjścia podłączone są do modułu diod SML-3 $\textit{100\_LED8}$. Rejestry A i C podłączone są do procesora w taki sposób by reagowały tylko na operacje zapisu do przestrzeni wejścia/wyjścia (rejestr B) lub odczytu (rejestr C), a więc wyświetlanie zawartości oraz odczyt stanu przycisku zliczającego.
 
 
-\section{Poblemy}
-W trakcie pracy nad licznikiem natrafiliśmy na problem związany z ogranizacją kodu w przestrzeni pamięciowej procesora Z80 (dobrze to sformułowałem? xD), napisany przez nas kod wykorzystujący (polecenie/dyrektywe czy jak to się zwie) ORG /adres/ w celu umieszczenia bloku kodu w oddzielnym miejscu w pamięciu nie było uwzględniane w pliku kompilacyjnym (proszę poprawcie wszystko co napisałem źle, kompletnie się na tym nie znam xD), przez co cały sklejony kod lądował pod adresem 1800h. Rozwiązaliśmy ten problem za pomocą zapełniania komórek pamięci zerami (kodami instrukcji NOP), pozwoliło nam to na odpowiednią organiację kodu w pamięci, ponieważ niewykorzystywane przez nas komórki pamięci np. pomiędzy adresem 1802h a 1838h po zapełnieniu zerami za pomocą instrukcji DS cośtam pozwoliły na zapisanie kodu obsługi przerwania w odpowiednim miejscu (pod adresem 1838h).
+\section{Problemy}
+W trakcie pracy nad licznikiem natrafiliśmy na problem związany z organizacją kodu w przestrzeni pamięciowej procesora Z80 (dobrze to sformułowałem? xD), napisany przez nas kod wykorzystujący (polecenie/dyrektywę czy jak to się zwie) ORG /adres/ w celu umieszczenia bloku kodu w oddzielnym miejscu w pamięci nie było uwzględniane w pliku kompilacyjnym (proszę poprawcie wszystko co napisałem źle, kompletnie się na tym nie znam xD), przez co cały sklejony kod lądował pod adresem 1800h. Rozwiązaliśmy ten problem za pomocą zapełniania komórek pamięci zerami (kodami instrukcji NOP), pozwoliło nam to na odpowiednią organizację kodu w pamięci, ponieważ niewykorzystywane przez nas komórki pamięci np. pomiędzy adresem 1802h a 1838h po zapełnieniu zerami za pomocą instrukcji DS cośtam pozwoliły na zapisanie kodu obsługi przerwania w odpowiednim miejscu (pod adresem 1838h).
 \end{document}
