@@ -72,14 +72,6 @@ Graf składa się z 4 stanów. W stanie początkowym układ oczekuje na wciśni�
 
 \pagebreak
 
- W stanie \textbf{S0} automat czeka na pojawienie się sygnału wciśnięcia przycisku inkrementacji. Sprawdza więc najmniej znaczący bit rejestru E, który służy do przechowywania obecnego stanu przycisku. Jeśli ma on wartość 0, styki zostały zwarte i automat przechodzi do stanu \textbf{S1}.
- 
- W stanie \textbf{S1} następuje zliczanie w celu eliminacji drgań przycisku. Każdy obieg pętli głównej programu powoduje inkrementację rejestru C, w którym zliczany jest czas do stabilizacji złącz. Jeśli przed doliczeniem do 255 nastąpi rozłączenie styków, rejestr C jest resetowany, a automat wraca do stanu \textbf{S0}. Jeśli Przycisk był wciśnięty przez 255 przejść pętli, rejestr C jest resetowany, następuje inkrementacja licznika głównego B odpowiedzialnego za przechowywanie wartości licznika z zadania oraz automat przechodzi do stanu \textbf{S2}.
- 
-W stanie \textbf{S2} automat czeka na puszczenie przycisku. Jeśli najmniej znaczący bit rejestru E jest równy jeden, automat przechodzi do stanu \textbf{S3}.
-
-W stanie \textbf{S3} Następuje zliczanie obiegów pętli głównej programu z puszczonym przyciskiem. Jeśli styki wciąż są rozwarte, to jest inkrementowany rejestr C. Gdy uzyska on wartość 255, Jest resetowany, a automat przechodzi do stanu \textbf{S0}. Gdy natomiast przed doliczeniem do tej wartości nastąpi połączenie styków, rejestr C również jest resetowany, ale automat przechodzi do stanu \textbf{S2}.
-
 Na podstawie stanów automatu powstał kod napisany w języku Assembly.
 
 \section{Program}
