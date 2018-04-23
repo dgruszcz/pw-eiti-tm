@@ -86,7 +86,18 @@ Na podstawie stanów automatu powstał kod napisany w języku Assembly.
 \noindent\begin{minipage}{.45\textwidth}
 	\lstinputlisting[firstline=51]{src/main.lst}
 \end{minipage}\hfill
-
+\\
+\section{Opis kodu}
+Do realizacji zadania licznika wykorzystaliśmy cztery rejestry: B do przechowywania wartości licznika głównego, C do eliminacji drgań przycisku, D do przechowywania stanu automatu, E do przechowywania aktualnego stanu przycisku.
+Na samym początku ustawiany jest wskaźnik stosu, tryb obsługi przerwań oraz ustawiane są wartości początkowe odpowiednich rejestrów, następnie następuje  przeskok do pętli głównej programu. \\
+Początkowo program znajduje się w stanie \textbf{Z3}, ale gdy przycisk pozostaje niewciśnięty,  automat doliczy w rejestrze C do wartości 255 i wróci do stanu \textbf{Z0}.\\
+Z każdym obiegiem pętli głównej jest pobierany najmniej znaczący bit z szyny danych, jego wartośc jest składowana w rejestrze E, do akumulatora ładowany jest aktualny stan automatu. Również na koniec wykonywania instrukcji z każdego stanu następuje przeskok do początku pętli głównej, aby uniknąć blokowania procesora.\\
+Na początku każdego stanu program sprawdza, czy znajduje się właśnie w nim. Jeśli tak nie jest, następuje przeskok do następnego. Jeśli w stanie \textbf{Z3} porównanie najmniej znaczących bitów z rejestrem A zwróci wartość 0, program wykona skok do początku pętli głównej.\\
+W stanie \textit{s0} następuje załadowanie do akumulatora aktualnego stanu przycisku i sprawdzenie, czy został wciśnięty. Jeśli styki zostały złączone, stan automatu zmienia się na \textbf{Z1}, jeśli nie, następuje powrót do początku pętli głównej.\\
+W punkcie \textit{s1} program sprawdza, czy przycisk jest wciąż wciśnięty. jeśli nie jest, następuje reset licznika C, a program wraca do stanu \textbf{Z0}. Jeśli styki wciąż są zwarte, rejestr C jest inkrementowany, następuje sprawdzenie, czy rejestr C doliczył do 255. Jeśli nie, wykonany zostaje skok do początku pętli, jeśli tak, zostaje zinkrementowany licznik główny B i wyświetlana jest nowa jego wartośc, zresetowany rejestr C oraz zmieniony stan automatu na \textbf{Z2}.\\
+W punkcie \textit{s2} program sprawdza, czy aktualny stan przycisku uległ zmianie. Jeśli wciąż jest wciśnięty następuje powrót do początku pętli. Jeśli styki zostały rozwarte, następuje przejście do stanu \textbf{Z3}.\\
+Punkt \textit{s3} jest analogiczny do \textit{s1}. Następuje porównanie najmłodszych bitów akumulatora oraz rejestru E, jeśli został wciśnięty, następuje powrót do stanu \textbf{Z2}, jeśli w rejestrze C znajdzie się liczba 255, jest on restowany, program ustawia stan \textbf{s0} i wraca do początku pętli głównej.
+%TODO: opis sekcji krytycznej
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/schematic.pdf}
