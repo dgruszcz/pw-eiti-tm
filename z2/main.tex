@@ -100,7 +100,7 @@ Punkt \textit{s3} jest analogiczny do \textit{s1}. Następuje porównanie najmł
 
 \textbf{Sekcja krytyczna}
 \\
-Sekcja krytyczna znajduje się w miejscu inkrementacji licznika głównego. Gdyby w stanie \textit{s1} tuż przed porównaniem wartości rejestru C z wartością 255 nastąpiło przerwanie, które zmienia zawartość akumulatora,po jego zakończeniu mogłaby zostać przyrównana inna wartość, powodując błąd w programie. 
+Sekcja krytyczna znajduje się w miejscu inkrementacji licznika głównego. Gdyby w stanie \textit{s1} tuż przed porównaniem wartości rejestru C z wartością 255 nastąpiło przerwanie, które zmienia zawartość akumulatora,po jego zakończeniu mogłaby zostać przyrównana inna wartość, powodując błąd w wyświetlaniu odpowiedniej wartości licznika. Sekcja krytyczna znajduje się również w procedurze \textit{disp}, gdzie w czasie przerwania mógłaby ulec zmianie zawartość rejestru B i zostałaby wyświetlona ponownie zła wartość licznika.
 %TODO: opis sekcji krytycznej
 \begin{figure}[H]
 	\centering
