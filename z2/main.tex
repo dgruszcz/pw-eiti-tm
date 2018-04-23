@@ -26,7 +26,7 @@
 \clubpenalty=1000
 \widowpenalty=1000
 
-\title{TM -- Laboratorium 2.}
+\title{TM -- Laboratorium 2. \\ \large Licznik 4-bitowy – zerowanie, zliczanie w górę – kod NKB}
 \author{Krystian Chachuła \\ Dawid Gruszczyński \\ Marcin Skrzypkowski}
 
 \begin{document}
@@ -63,6 +63,12 @@ Projektowanie licznika rozpoczęliśmy od stworzenia grafu stanów, który uwzgl
 Graf składa się z 4 stanów. W statnie początkowym układ oczekuje na wciśnięcie przycisku, w stanie drugim eliminowane są drgania związanie z wciśnięciem przycisku, w statnie trzeciem układ oczekuje na puszczenie przycisku, w stanie 4 eleminowane są drgania związanie z puszczeniem przycisku.
 %TODO ogarnąć grafuu
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.72\textwidth]{img/graph.png}
+	\caption{Graf automatu stanów}
+	\label{fig:graph}
+\end{figure}
 
 Następnie na podstawie grafu powstał kod napisany w języku Assembly.
 
