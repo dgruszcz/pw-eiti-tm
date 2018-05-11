@@ -42,11 +42,8 @@ loop_1:
 			inc 	R5
 			cmp		#0x04FF, R5
 			jnz		loop_1
-			mov.w	P4IN, R6
-			dec		R6
-			sub.w	P3OUT, R6
-			bit.w	#0x8000, R6
-			jz		loop_2
+			cmp		P4IN, P3OUT
+			jl		loop_2
 			mov.b	#0x00, P3OUT
 			jmp		loop_3
 loop_2:
