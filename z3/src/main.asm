@@ -22,8 +22,8 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
 			mov.b	#0xff, P3DIR			; Set P3 as output
 			mov.b	#0x01, P1IES
 			mov.b	#0x01, P1IE
-			mov.b	#0x02, P2IES
-			mov.b	#0x02, P2IE
+			mov.b	#0x08, P2IES
+			mov.b	#0x08, P2IE
 
 			mov.w	#0x00, R5 				; Debouncing register
 
@@ -36,11 +36,11 @@ loop:
 	 		bis 	#GIE+CPUOFF+SCG1+SCG0, SR
 loop_1:
 
- 			bit.b	#0x02, P2IN
+ 			bit.b	#0x08, P2IN
 			jnz 	loop_3
 
 			inc 	R5
-			cmp		#0x0FFF, R5
+			cmp		#0x04FF, R5
 			jnz		loop_1
 			mov.w	P4IN, R6
 			dec		R6
@@ -55,7 +55,7 @@ loop_3:
 			clr		R5
 			mov.b	#0x00, P2IFG
 			dint
-			mov.b	#0x02, P2IE
+			mov.b	#0x08, P2IE
 			jmp		loop
 
 ;-------------------------------------------------------------------------------
