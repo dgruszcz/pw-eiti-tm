@@ -34,8 +34,13 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
 ;-------------------------------------------------------------------------------
 loop:
 	 		bis 	#GIE+CPUOFF+SCG1+SCG0, SR
-loop_1:
+	 		;eint
 
+loop_1:
+			bit.b	#0x01, P1IN
+			jz		loop_1
+			bit.b	#0x08, P2IFG
+			jz		loop_3
  			bit.b	#0x08, P2IN
 			jnz 	loop_3
 
@@ -43,11 +48,13 @@ loop_1:
 			cmp		#0x04FF, R5
 			jnz		loop_1
 			cmp		P4IN, P3OUT
+			dint
 			jl		loop_2
 			mov.b	#0x00, P3OUT
 			jmp		loop_3
 loop_2:
 			inc 	P3OUT
+			eint
 loop_3:
 			clr		R5
 			mov.b	#0x00, P2IFG
@@ -55,21 +62,21 @@ loop_3:
 			mov.b	#0x08, P2IE
 			jmp		loop
 
+
 ;-------------------------------------------------------------------------------
 ; ISRs
 ;-------------------------------------------------------------------------------
 isrP1:  ; reset
 			mov.b	#0x00, P3OUT
-			bit.b	#0x01, P1IN
-
-			jz 	isrP1_1
+			bic.w	#0x0104, SR
 			mov.b	#0x00, P1IFG
 			mov.b	#0x00, P2IFG
+			mov.b	#0x00, P2IE
 isrP1_1:
-			mov.w   #loop_3, 2(SP)
+			bic		#CPUOFF+SCG1+SCG0, 0(SP)
 			reti
+
 isrP2:  ; licz
-			mov.b	#0x00, P2IFG
 			bic		#CPUOFF+SCG1+SCG0, 0(SP)
 			mov.b	#0x00, P2IE
 			reti
