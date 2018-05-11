@@ -37,13 +37,21 @@ loop:
 loop_1:
 
  			bit.b	#0x02, P2IN
-			jnz 	loop_2
+			jnz 	loop_3
 
 			inc 	R5
-			cmp		#0xFFF, R5
+			cmp		#0x0FFF, R5
 			jnz		loop_1
-			inc 	P3OUT
+			mov.w	P4IN, R6
+			dec		R6
+			sub.w	P3OUT, R6
+			bit.w	#0x8000, R6
+			jz		loop_2
+			mov.b	#0x00, P3OUT
+			jmp		loop_3
 loop_2:
+			inc 	P3OUT
+loop_3:
 			clr		R5
 			mov.b	#0x00, P2IFG
 			dint
@@ -61,7 +69,7 @@ isrP1:  ; reset
 			mov.b	#0x00, P1IFG
 			mov.b	#0x00, P2IFG
 isrP1_1:
-			mov.w   #loop_2, 2(SP)
+			mov.w   #loop_3, 2(SP)
 			reti
 isrP2:  ; licz
 			mov.b	#0x00, P2IFG
