@@ -20,8 +20,10 @@
 RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
 StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
 			mov.b	#0xff, P3DIR			; Set P3 as output
+
 			mov.b	#0x01, P1IES
 			mov.b	#0x01, P1IE
+
 			mov.b	#0x08, P2IES
 			mov.b	#0x08, P2IE
 
@@ -34,31 +36,30 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
 ;-------------------------------------------------------------------------------
 loop:
 	 		bis 	#GIE+CPUOFF+SCG1+SCG0, SR
-	 		;eint
-
 loop_1:
+			eint
 			bit.b	#0x01, P1IN
 			jz		loop_1
-			bit.b	#0x08, P2IFG
-			jz		loop_3
+			bit.b	#0x01, R6
+			jnz		loop_3
  			bit.b	#0x08, P2IN
 			jnz 	loop_3
-
 			inc 	R5
+			dint
 			cmp		#0x04FF, R5
 			jnz		loop_1
 			cmp		P4IN, P3OUT
-			dint
 			jl		loop_2
 			mov.b	#0x00, P3OUT
 			jmp		loop_3
 loop_2:
 			inc 	P3OUT
-			eint
 loop_3:
+			eint
 			clr		R5
 			mov.b	#0x00, P2IFG
 			dint
+			clr     R6
 			mov.b	#0x08, P2IE
 			jmp		loop
 
@@ -66,17 +67,18 @@ loop_3:
 ;-------------------------------------------------------------------------------
 ; ISRs
 ;-------------------------------------------------------------------------------
-isrP1:  ; reset
+isrP1:  ; Reset
 			mov.b	#0x00, P3OUT
-			bic.w	#0x0104, SR
 			mov.b	#0x00, P1IFG
 			mov.b	#0x00, P2IFG
 			mov.b	#0x00, P2IE
+			clr     R5
+			bis.w   #0x01, R6
 isrP1_1:
 			bic		#CPUOFF+SCG1+SCG0, 0(SP)
 			reti
 
-isrP2:  ; licz
+isrP2:  ; Licz
 			bic		#CPUOFF+SCG1+SCG0, 0(SP)
 			mov.b	#0x00, P2IE
 			reti
