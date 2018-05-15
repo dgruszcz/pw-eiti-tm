@@ -56,7 +56,7 @@ Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układ�
 	\item \textbf{570\_MSP430F14x} (moduł mikrokontrolera Texas Instruments serii MSP430f14x lub F16x)
 \end{itemize}
 
-\section{Implementacja licznika} 
+\section{Implementacja licznika}
 
 Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał ogólny schemat działania licznika.
 %TODO ogarnąć grafuu
@@ -69,7 +69,7 @@ Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał 
 \end{figure}
 
 
-Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLK) lub portu P2 (zbocze przycisku CLR). Następnie następuje przejście do obsługi zgłoszonego przerwania.
+Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLR) lub portu P2 (zbocze przycisku CLK). Następnie następuje przejście do obsługi zgłoszonego przerwania.
 
 W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku przerwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejestr R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler.
 
@@ -79,54 +79,49 @@ Eliminacja drgań odbywa się poprzez zliczanie do pewnej wartości za pomocą r
 
 Na podstawie grafu powstał kod napisany w języku Assembly.
 
-\pagebreak
 
-\section{Program}
-%TODO Opis kodu
-\subsection{init}
 
+\section{Kod programu oraz jego opis}
+
+\subsection{Blok Init}
 		Na samym początku programu ustawiany jest wskaźnik stosu i wyłączany niepotrzebny w naszym obecnym projekcie watchdog, który nieobsłużony powodowałby niepożądany reset mikrokontrolera.
 		W bloku \textit{Init} następuje ustawienie podstawowych flag przed rozpoczęciem działania licznika, a więc:
 		\begin{itemize}
 			\item następuje przypisanie przycisków zliczania i resetu do odpowiednich linii portów
-			\item następuje odblokowanie przerwań portów, do których są podłączone przyciski
-			\item następuje wyzerowanie rejestrów do debouncingu (\textit{R5}) i flagi przerwania resetującego (\textit{R6})
+			\item następuje odblokowanie przerwań pinów, do których są podłączone przyciski
+			\item następuje wyzerowanie rejestru do debouncingu (\textit{R5}) oraz rejestru przechowującego pomocniczą flagę przerwania zerującego (\textit{R6})
 			\item skonfigurowanie odpowiednich portów
 		\end{itemize}
 
-		W następnym bloku procesor od razu jest wprowadzany w stan oszczędzania energii LPM4 (wyłączone wszystkie zegary i procesor), z którego może być wybudzony tylko przerwaniem przyciski CLK bądź CLR.
+		W następnym bloku procesor od razu jest wprowadzany w stan oszczędzania energii LPM4 (wyłączone wszystkie zegary i procesor), z którego może być wybudzony tylko przerwaniem przycisku CLK bądź CLR. Po wybudzeniu następuje przejście do głównej części pętli.
 
-		Po wystąpieniu przerwania od przycisku zliczania resetowane są flagi odpowiedzialne za oszczędzanie energii, aby procesor mógł przejść po jego obsłudze do pętli głównej zamiast wrócić do stanu uśpienia. Blokowane są również przerwania od zliczania, aby podczas wykonywania instrukcji z pętli głównej nie były cały czas zgłaszane przerwania z przycisku do zliczania. Po powrocie z przerwania następuje przejście do procedury \textit{loop\_1}.
+\subsection{Procedura loop\_1}
+		Pierwszą instrukcją, jaka jest wykonywana w tej procedurze, jest sprawdzenie wciśnięcia przycisku resetu. Jeśli jest on wciśnięty, następuje zapętlenie do loop\_1. Jeśli nie jest oznacza to, że albo został on puszczony, albo nie wystąpiło przerwanie zerujące a mikropocesor jest w trakcie sprawdzania dgrań przycisku zliczającego. W celu kontunuacji sprawdzana jest pomocnicza flaga znajdująca się w rejestrze R6, która ustawiana jest gdy wywoływane jest przerwanie zerujące. W sytuacji gdy jest ona równa 0, mikrokontroler może kontynuwać pracę, w przeciwnym przypadku następuje skok do procedury \textit{loop\_3} zakańczającej główną pętlę. Następnie, w celu eliminacji drgań styków, sprawdzany jest stan przycisku zliczającego. W przypadku gdy jest on puszczony przed doliczeniem do wartości testowej (ustaliliśmy wspólnie, że wystarczająca wartością będzie 0x04FF) następuje przeskok do \textit{loop\_3}. Jeśli debouncing zostanie zakończony pomyślnie, porównywana jest wartość aktualna licznika z wartością ustawioną na przełącznikach szesnastkowych. Jeżeli wartość na przełącznikach jest równa bądź mniejsza niż aktualna wartość licznika głównego, jest on resetowany i program skacze do procedury \textit{loop\_3}, w przeciwnym przypadku następuje inkremetacja licznika i przejście do procedury \textit{loop\_3}.
 
-		Po wystąpieniu przerwania resetującego resetowany jest licznik główny, resetowane są flagi przerwań obu przycisków, aby po wyjściu z przerwania nie zgłaszały się one nieustannie, oraz blokowana jest maska przerwania zliczającego, aby nie mogło się ono wywołać po wyjściu z obsługi przerwania resetującego (mogło by, bo resetujemy flagę przerwania resetującego). Następnie resetujemy rejestr odpowiedzialny za czas debouncingu i ustwiana jest nasza flaga oznajmiająca wystąpienie przerwania resetującego (rejestr \textit{R6}) i podobnie jak w przerwaniu przycisku zliczającego modyfikujemy stos, aby po wyjściu z przerwania nie wrócić do stanu oszczędzania energii, tylko pracować z pełną mocą.
-
-\subsection{loop\_1}
-		Pierwszą instrukcją, jaka jest wykonywana w tej procedurze, jest sprawdzenie wciśnięcia przycisku resetu. Jeśli jest on wciśnięty, następuje zapętlenie do loop\_1. Jeśli nie jest, prównywana jest z jedynką wartość rejestru odpowiedzialnego za informację o przerwaniu resetującym. Jeśli wcześniej wystąpiło przerwanie resetujące (\textit{R6} został ustaw ustawiony), następuje skok do procedury \textit{loop\_3}, jeśli natomiast przerwanie CLR nie wystąpiło, następuje debouncjing przcisku CLK. W przypadku puszczenia przycisku przed doliczeniem do wartości testowej (ustaliliśmy wspólnie, że wystarczająca wartością będzie 0x04FF) następuje przeskok do \textit{loop\_3}. Jeśli debouncing zostanie zakończony pomyślnie, porównywana jest wartość aktualna licznika z wartością ustawioną na przełącznikach szesnatkowych. Jeśli wartość na przełącznikach jest równa bądź z jakiegoś powodu mniejsza niż aktualna wartość licznika głównego, jest on resetowany i program skacze do procedury \textit{loop\_3}. Jeśli wartość licznika jest poniżej granicy, następuje jego inkrementacja i przejście do procedury \textit{loop\_3}.
-
-\subsection{loop\_3}
-
+\subsection{Procedura loop\_3}
 		W tej procedurze następuje czyszczenie rejestru debouncingu, reset flagi przerwania zliczającego i reset rejestru wystąpienia przerwania resetującego. Następnie odblokowane zostają przerwania od CLK i następuje powrót do stanu oszczędzania energii.
 
+\subsection{Blok Przerwań}
+		Po wystąpieniu przerwania od przycisku zliczania resetowane są bity odpowiedzialne za wprowadzanie mikrokontrolera w stan oszczędzania energii, aby procesor mógł przejść po jego obsłudze do pętli głównej. Blokowane są również przerwania od tego przycisku, aby podczas sprawdzania drgań nie były zgłaszane kolejne przerwania zliczające. Po powrocie z przerwania następuje przejście do procedury \textit{loop\_1}.
+
+		Po wystąpieniu przerwania resetującego resetowany jest licznik główny, resetowane są flagi przerwań obu przycisków, aby po wyjściu z przerwania nie zgłaszały one przerwań, oraz wyłączane są przerwania zliczające, aby nie mogły być one wywoływane po wyjściu z obsługi przerwania resetującego (podczas gdy przycisk CLR jest wciśnięty nie chcemy by istaniła możliwość wywołania przerwania od przycisku CLK). Następnie resetujemy rejestr odpowiedzialny za eliminację drgań i ustawiana jest pomocnicza flaga oznajmiająca wystąpienie przerwania resetującego (zerowy bit rejestru \textit{R6}) i podobnie jak w przerwaniu przycisku zliczającego trwale wybudzamy mikrokontroler, by znowu móc pracować z pełną mocą. xD
 
 
 
-%TODO kod
+
+
+
+\textbf{Kod programu:}
+
+
+
 \lstinputlisting[lastline=55]{src/main.asm}
-
-\pagebreak
 
 \lstinputlisting[firstline=56]{src/main.asm}
 
 \pagebreak
 
 \section{Podłączenie procesora}
-
-%\begin{figure}[H]
-	%\centering
-	%\includegraphics[width=\textwidth]{img/schematic.pdf}
-	%\caption{Schemat układu}
-	%\label{fig:schematic}
-%\end{figure}
 
 Przyciski sterujące pracą licznika podłaczyliśmy do portów P1 oraz P2, (przycisk CLR do pinu 1 portu P1, ponieważ musi on posiadać większy priorytet, natomiast przycisk CLK do pinu 4 portu P2). Wyjściem licznika jest port P3 skonfigurowany jako wyjście, którego zawartość wyświetlana jest za pomocą modułu wyświetlacza 7 segmentowego. Do wczytywania wartości zadanej, do której ma zliczać licznik, wykorzystaliśmy port P4 skonfigurowany jako wejście. Jest on bezpośrednio podłaczony do modułu przełączników szesnatkowych.
 
