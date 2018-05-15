@@ -95,6 +95,11 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 	%\label{fig:schematic}
 %\end{figure}
 
-Przyciski sterujące pracą licznika podłaczyliśmy do portów P1 oraz P2, (przycisk CLR do portu P1, ponieważ musi on posiadać większy priorytet, natomiast przycisk CLK do portu P2). Wyjściem licznika jest port P3 skonfigurowany jako wyjście, którego zawartość wyświetlana jest za pomocą modułu wyświetlacza 7 segmentowego. Do wczytywania wartości zadanej, do której ma zliczać licznik, wykorzystaliśmy port P4 skonfigurowany jako wejście. Jest on bezpośrednio podłaczony do modułu przełączników szesnatkowych.
+Przyciski sterujące pracą licznika podłaczyliśmy do portów P1 oraz P2, (przycisk CLR do pinu 1 portu P1, ponieważ musi on posiadać większy priorytet, natomiast przycisk CLK do pinu 4 portu P2). Wyjściem licznika jest port P3 skonfigurowany jako wyjście, którego zawartość wyświetlana jest za pomocą modułu wyświetlacza 7 segmentowego. Do wczytywania wartości zadanej, do której ma zliczać licznik, wykorzystaliśmy port P4 skonfigurowany jako wejście. Jest on bezpośrednio podłaczony do modułu przełączników szesnatkowych.
+
+\section{Możliwości rozwoju}
+
+Możliwym udoskonaleniem zadania byłoby dodatkowe sprawdzanie poprawności odczytu wartości zadanej z modułu przełączników szesnastkowych. Odczyt w złym momencie może powodować przekłamania niektórych bitów spowodowane przełączaniem między pozycjami. Aby mieć pewność, że odczytany stan jest stabilny należy kilkukrotnie odczytać sygnał wejściowy na porcie P4 i sprawdzić czy odczytane wartości nie rożnią się między sobą. W przypadku różnic należy przeprowadzać ponowne odczyty aż do uzyskania wartości stabilnej.
 
 \end{document}
+\grid
