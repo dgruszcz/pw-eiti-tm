@@ -69,7 +69,7 @@ Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał 
 \end{figure}
 
 
-Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLK) lub portu P2 (zbocze przycisku CLR). Następnie następuje przejście do obsługi zgłoszonego przerwania.
+Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLR) lub portu P2 (zbocze przycisku CLK). Następnie następuje przejście do obsługi zgłoszonego przerwania.
 
 W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku przerwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejestr R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler.
 
@@ -118,6 +118,13 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 \lstinputlisting[firstline=56]{src/main.asm}
 
 \pagebreak
+\subsection{sekcja krytyczna}
+		Występuje w okolicach bloku inkrementacji licznika głównego. Gdyby zaraz po zakończeniu debouncingu nastąpiło przerwanie CLR, rejestr \textit{R5} i licznik główny zostałyby zresetowane, a po wyjściu z przerwania nastąpiła by obsługa inkrementacji licznika głównego.
+		Również tuż przed powrotem do trybu oszczędzania energii przerwania powinny być zablokowane. Wejście przerwania zaraz po wyczyszczeniu rejestru \textit{R6} powodowałoby przy następnym wybudzeniu przyciskiem zliczania przeskok od razu do procedury \textit{loop\_3}, gdyż w przerwaniu CLR rejestr
+
+		Również tuż przed powrotem do trybu oszczędzania energii przerwania powinny być zablokowane. Wejście przerwania zaraz po wyczyszczeniu rejestru \textit{R6} powodowałoby przy następnym wybudzeniu przyciskiem zliczania przeskok od razu do procedury \textit{loop\_3}, gdyż w przerwaniu CLR rejestr \textit{R6} jest ponownie ustawiany. Natomiast zgłoszenie przerwania zaraz za instrukcją ustawiania bitu powodowała by blokowanie przerwania od zliczania przycisku.
+
+
 
 \section{Podłączenie procesora}
 
