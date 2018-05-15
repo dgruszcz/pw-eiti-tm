@@ -73,7 +73,7 @@ Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie 
 
 W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku przerwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejestr R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler.
 
-Przerwania zliczające mogą być wywoływane tylko w momencie gdy mikrokontroler jest w stanie uśpienia, natomiast przerwania zerujące mogą być wywoływane w każdym miejscu poza sekcją krytyczną związaną z inkrementacją licznika. Przerwania nie mogą być zagnieżdżane. W pętli głównej programu, sprawdzane jest czy wciśnięty jest przycisk zerujący (w przypadku zerowania licznika blokujemy możliwość inkrementacji do momentu puszczeniu przycisku CLR) oraz czy wciśnięty jest przycisk zliczania (eliminacja drgań w przypadku inkrementacji licznika).
+Przerwania zliczające mogą być wywoływane tylko w momencie gdy mikrokontroler jest w stanie uśpienia, natomiast przerwania zerujące mogą być wywoływane w każdym miejscu poza sekcją krytyczną związaną z inkrementacją licznika. Przerwania nie mogą być zagnieżdżane. W pętli głównej programu, sprawdzane jest czy wciśnięty jest przycisk zerujący (w przypadku zerowania licznika blokujemy możliwość inkrementacji do momentu puszczenia przycisku CLR) oraz czy wciśnięty jest przycisk zliczania (eliminacja drgań w przypadku inkrementacji licznika).
 
 Eliminacja drgań odbywa się poprzez zliczanie do pewnej wartości za pomocą rejestru R5. Po pomyślnym przeczekaniu drgań następuje inkrementacja licznika. Proces eliminacji drgań może zostać przerwany przez wciśnięcie przycisku CLR, w takim przypadku licznik jest zerowany a proces inkrementacji zostaje przerwany. Po zakończeniu zerowania lub inkrementacji licznika, zerowany jest rejestr R5 oraz włączane są przerwania przycisku zliczającego, następnie mikrokontroler ponownie jest usypiany.
 
@@ -96,7 +96,7 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 		W następnym bloku procesor od razu jest wprowadzany w stan oszczędzania energii LPM4 (wyłączone wszystkie zegary i procesor), z którego może być wybudzony tylko przerwaniem przycisku CLK bądź CLR. Po wybudzeniu następuje przejście do głównej części pętli.
 
 \subsection{Procedura loop\_1}
-		Pierwszą instrukcją, jaka jest wykonywana w tej procedurze, jest sprawdzenie wciśnięcia przycisku resetu. Jeśli jest on wciśnięty, następuje zapętlenie do loop\_1. Jeśli nie jest oznacza to, że albo został on puszczony, albo nie wystąpiło przerwanie zerujące a mikropocesor jest w trakcie sprawdzania dgrań przycisku zliczającego. W celu kontunuacji sprawdzana jest pomocnicza flaga znajdująca się w rejestrze R6, która ustawiana jest gdy wywoływane jest przerwanie zerujące. W sytuacji gdy jest ona równa 0, mikrokontroler może kontynuwać pracę, w przeciwnym przypadku następuje skok do procedury \textit{loop\_3} zakańczającej główną pętlę. Następnie, w celu eliminacji drgań styków, sprawdzany jest stan przycisku zliczającego. W przypadku gdy jest on puszczony przed doliczeniem do wartości testowej (ustaliliśmy wspólnie, że wystarczająca wartością będzie 0x04FF) następuje przeskok do \textit{loop\_3}. Jeśli debouncing zostanie zakończony pomyślnie, porównywana jest wartość aktualna licznika z wartością ustawioną na przełącznikach szesnastkowych. Jeżeli wartość na przełącznikach jest równa bądź mniejsza niż aktualna wartość licznika głównego, jest on resetowany i program skacze do procedury \textit{loop\_3}, w przeciwnym przypadku następuje inkremetacja licznika i przejście do procedury \textit{loop\_3}.
+		Pierwszą instrukcją, jaka jest wykonywana w tej procedurze, jest sprawdzenie wciśnięcia przycisku resetu. Jeśli jest on wciśnięty, następuje zapętlenie do loop\_1. Jeśli nie jest oznacza to, że albo został on właśnie puszczony, albo nie wystąpiło przerwanie zerujące a mikropocesor jest w trakcie sprawdzania dgrań przycisku zliczającego. W celu kontunuacji sprawdzana jest pomocnicza flaga znajdująca się w rejestrze R6, która ustawiana jest gdy wywoływane jest przerwanie zerujące. W sytuacji gdy jest ona równa 0, mikrokontroler może kontynuwać pracę, w przeciwnym przypadku następuje skok do procedury \textit{loop\_3} zakańczającej główną pętlę. Następnie, w celu eliminacji drgań styków, sprawdzany jest stan przycisku zliczającego. W przypadku gdy jest on puszczony przed doliczeniem do wartości testowej (ustaliliśmy wspólnie, że wystarczająca wartością będzie 0x04FF) następuje przeskok do \textit{loop\_3}. Jeśli debouncing zostanie zakończony pomyślnie, porównywana jest wartość aktualna licznika z wartością ustawioną na przełącznikach szesnastkowych. Jeżeli wartość na przełącznikach jest równa bądź mniejsza niż aktualna wartość licznika głównego, jest on resetowany i program skacze do procedury \textit{loop\_3}, w przeciwnym przypadku następuje inkremetacja licznika i przejście do procedury \textit{loop\_3}.
 
 \subsection{Procedura loop\_3}
 		W tej procedurze następuje czyszczenie rejestru debouncingu, reset flagi przerwania zliczającego i reset rejestru wystąpienia przerwania resetującego. Następnie odblokowane zostają przerwania od CLK i następuje powrót do stanu oszczędzania energii.
@@ -106,20 +106,19 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 
 		Po wystąpieniu przerwania resetującego resetowany jest licznik główny, resetowane są flagi przerwań obu przycisków, aby po wyjściu z przerwania nie zgłaszały one przerwań, oraz wyłączane są przerwania zliczające, aby nie mogły być one wywoływane po wyjściu z obsługi przerwania resetującego (podczas gdy przycisk CLR jest wciśnięty nie chcemy by istaniła możliwość wywołania przerwania od przycisku CLK). Następnie resetujemy rejestr odpowiedzialny za eliminację drgań i ustawiana jest pomocnicza flaga oznajmiająca wystąpienie przerwania resetującego (zerowy bit rejestru \textit{R6}) i podobnie jak w przerwaniu przycisku zliczającego trwale wybudzamy mikrokontroler, by znowu móc pracować z pełną mocą. xD
 
+\subsection{Sekcja krytyczna}
+		Blok sekcji krytycznej występuje w okolicach inkrementacji licznika głównego. Jest ona konieczna, powieważ w przypadku gdyby zaraz po zakończeniu debouncingu nastąpiło przerwanie od przycisku CLR, rejestr \textit{R5} i licznik główny zostałyby zresetowane, lecz zaraz po zakończeniu obsługi przerwania licznik byłby inkrementowany.
 
-
-
+		Wyłączanie przerwań jest konieczne również tuż przed powrotem do trybu oszczędzania energii. Wywołanie przerwania CLR zaraz po wyczyszczeniu rejestru \textit{R6} powodowałoby przy następnym wybudzeniu przyciskiem zliczania przeskok od razu do procedury \textit{loop\_3}, gdyż ustawiona przez to przerwanie flaga w rejestrze \textit{R6} nie byłaby kasowana. Natomiast zgłoszenie przerwania przycisku zliczającego zaraz po aktywacji jego przerwań powodowałaby blokowanie możliwości inkrementacji licznika (w trakcie obsługi przerwania zliczającego, przerwania te są trwale wyłączane) - procesor byłby usypiany z wyłączonymi przerwaniami zliczającymi.
 
 
 \textbf{Kod programu:}
 
+\lstinputlisting{src/main.asm}
 
 
-\lstinputlisting[lastline=55]{src/main.asm}
 
-\lstinputlisting[firstline=56]{src/main.asm}
 
-\pagebreak
 
 \section{Podłączenie procesora}
 
@@ -127,7 +126,7 @@ Przyciski sterujące pracą licznika podłaczyliśmy do portów P1 oraz P2, (prz
 
 \section{Możliwości rozwoju}
 
-Możliwym udoskonaleniem zadania byłoby dodatkowe sprawdzanie poprawności odczytu wartości zadanej z modułu przełączników szesnastkowych. Odczyt w złym momencie może powodować przekłamania niektórych bitów spowodowane przełączaniem między pozycjami. Aby mieć pewność, że odczytany stan jest stabilny należy kilkukrotnie odczytać sygnał wejściowy na porcie P4 i sprawdzić czy odczytane wartości nie rożnią się między sobą. W przypadku różnic należy przeprowadzać ponowne odczyty aż do momentu uzyskania wartości stabilnej.
+Możliwym udoskonaleniem zadania byłoby dodatkowe sprawdzanie poprawności odczytu wartości zadanej z modułu przełączników szesnastkowych. Odczyt w złym momencie może powodować przekłamania niektórych bitów spowodowane przełączaniem między pozycjami. Aby mieć pewność, że odczytany stan jest stabilny, należy kilkukrotnie odczytać sygnał wejściowy na porcie P4 i sprawdzić, czy odczytane wartości nie rożnią się między sobą. W przypadku różnic należy przeprowadzać ponowne odczyty aż do momentu uzyskania wartości stabilnej.
 
 \end{document}
 \grid
