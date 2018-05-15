@@ -31,7 +31,7 @@ Init
 			mov.b	#CLR_BUT, P1IE
 
 			bis.b	#CLK_BUT, P2IES	; Konfiguracja przerwań CLK
-			mov.b	#CLK_BUT, P2IE
+			mov.b	#CLK_BUT, P2IE 
 
 			mov.w	#0x00, R5 		; Debouncing register
 			mov.w	#0x00, R6 		; Rejestr pomocniczy
