@@ -1,45 +1,29 @@
+            .cdecls C,LIST,"msp430.h"
+            .def    RESET
+            .text
+            .retain
+            .retainrefs
+RESET       mov.w   #__STACK_END,SP
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
 ;-------------------------------------------------------------------------------
-; MSP430 Assembler Code Template for use with TI Code Composer Studio
-;
-;
-;-------------------------------------------------------------------------------
-            .cdecls C,LIST,"msp430.h"       ; Include device header file
-            
-;-------------------------------------------------------------------------------
-            .def    RESET                   ; Export program entry-point to
-                                            ; make it known to linker.
-;-------------------------------------------------------------------------------
-            .text                           ; Assemble into program memory.
-            .retain                         ; Override ELF conditional linking
-                                            ; and retain current section.
-            .retainrefs                     ; And retain any sections that have
-                                            ; references to current section.
-
-;-------------------------------------------------------------------------------
-
-RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
-StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
-
-;-------------------------------------------------------------------------------
-Init    
+Init 
             CLK_BUT .set 0x08       ; Przycisk CLK
             CLR_BUT .set 0x01       ; Przycisk CLR
-            
+
             mov.b   #0xff, P3DIR    ; Set P3 as output
 
-            bis.b   #CLR_BUT, P1IES ; Konfiguracja przerwań CLR
+            bis.b   #CLR_BUT, P1IES ; Konfiguracja przerwan CLR
             mov.b   #CLR_BUT, P1IE
 
-            bis.b   #CLK_BUT, P2IES ; Konfiguracja przerwań CLK
+            bis.b   #CLK_BUT, P2IES ; Konfiguracja przerwan CLK
             mov.b   #CLK_BUT, P2IE 
 
             mov.w   #0x00, R5       ; Debouncing register
             mov.w   #0x00, R6       ; Rejestr pomocniczy
-    
-            mov.b   #0x00, P3OUT
 
+            mov.b   #0x00, P3OUT
 ;-------------------------------------------------------------------------------
-; Main loop here
+; Main loop
 ;-------------------------------------------------------------------------------
 loop:
             bis     #GIE+CPUOFF+SCG1+SCG0, SR
@@ -69,12 +53,10 @@ loop_3:
             clr     R6
             bis.b   #CLK_BUT, P2IE
             jmp     loop
-
-
 ;-------------------------------------------------------------------------------
 ; ISRs
 ;-------------------------------------------------------------------------------
-isrP1:  ; Przerwania przycisku CLR
+isrP1:      ; Przerwania przycisku CLR
             mov.b   #0x00, P3OUT
             bic.b   #CLR_BUT, P1IFG
             bic.b   #CLK_BUT, P2IFG
@@ -84,17 +66,15 @@ isrP1:  ; Przerwania przycisku CLR
             bic     #CPUOFF+SCG1+SCG0, 0(SP)
             reti
 
-isrP2:  ; Przerwania przycisku CLK
+isrP2:      ; Przerwania przycisku CLK
             bic     #CPUOFF+SCG1+SCG0, 0(SP)
             bic.b   #CLK_BUT, P2IE
             reti
-
 ;-------------------------------------------------------------------------------
 ; Stack Pointer definition
 ;-------------------------------------------------------------------------------
             .global __STACK_END
             .sect   .stack
-            
 ;-------------------------------------------------------------------------------
 ; Interrupt Vectors
 ;-------------------------------------------------------------------------------
