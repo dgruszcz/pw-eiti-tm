@@ -5,8 +5,10 @@
             .retainrefs
 RESET       mov.w   #__STACK_END,SP
 StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
+
 ;-------------------------------------------------------------------------------
-Init 
+; Init
+;-------------------------------------------------------------------------------
             CLK_BUT .set 0x08       ; Przycisk CLK
             CLR_BUT .set 0x01       ; Przycisk CLR
 
