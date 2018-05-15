@@ -44,7 +44,7 @@
 
 Na trzecim laboratorium mieliśmy za zadanie, korzystając z modułu mikrokontrolera MSP430 oraz innych modułów SML-3, zaprojektować i zrealizować licznik zliczający w górę w kodzie NKB z możliwością asynchronicznego zerowania jego zawartości.
 Sterowanie licznikiem miało odbywać się za pomocą dwóch przycisków (CLK aktywne zboczem oraz CLR aktywne poziomem).
-Dodatkowym wymogiem zadania była realizacja programowej eliminacji drgań styków oraz obsługa przynajmniej jednego z przycisków z użyciem przerwań.
+Dodatkowym wymogiem zadania była realizacja programowej eliminacji drgań styków oraz obsługa przynajmniej jednego z przycisków z użyciem przerwań oraz ograniczanie maksymalnej wartości licznika z pomocą przełączników szesnastkowych.
 
 Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układów SML-3:
 
@@ -69,7 +69,7 @@ Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał 
 \end{figure}
 
 
-Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLK) lub portu P2 (zbocze przycisku CLR). Następnie następuje przejście do obsługi zgłoszonego przerwania. W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku perwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejest R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istaniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler. Przerwania zliczające mogą być wywoływane tylko w momencie gdy mikrokontroler jest w stanie uśpienia, natomiast przerwania zerujące mogą być wywoływane w każdym miejscu poza sekcją krytyczną związaną z inkrementacją licznika. Przerwania nie mogą być zagnieżdżane. W pętli głównej programu, sprawdzane jest czy wciśnięty jest przycisk zerujący (w przypadku zerowania licznika blokujemy możliwośc inkrementacji do momentu puszczeniu przycisku CLR) oraz czy wciśnięty jest przycisk zliczania (eliminacja drgań w przypadku inkrementacji licznika). Eliminacja drgań odbywa się poprzez zliczanie do pewnej wartości za pomocą rejestru R5. Po pomyślnym przeczekaniu drgań następuje inkrementacja licznika. Proces eliminacji drgań może zostać przerwany przez wciśnięcie przycisku CLR, w takim przypadku licznik jest zerowany a proces inkrementacji zostaje przerwany. Po zakończeniu zerowania lub inkremetacji licznika, zerowany jest rejestr R5 oraz włączane są przerwania przycisku zliczającego, następnie mikrokontroler ponownie jest usypiany.
+Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P2 (zbocze przycisku CLK) lub portu P1 (zbocze przycisku CLR). Następnie następuje przejście do obsługi zgłoszonego przerwania. W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku perwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejest R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istaniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler. Przerwania zliczające mogą być wywoływane tylko w momencie gdy mikrokontroler jest w stanie uśpienia, natomiast przerwania zerujące mogą być wywoływane w każdym miejscu poza sekcją krytyczną związaną z inkrementacją licznika. Przerwania nie mogą być zagnieżdżane. W pętli głównej programu, sprawdzane jest czy wciśnięty jest przycisk zerujący (w przypadku zerowania licznika blokujemy możliwośc inkrementacji do momentu puszczenia przycisku CLR) oraz czy wciśnięty jest przycisk zliczania (eliminacja drgań w przypadku inkrementacji licznika). Eliminacja drgań odbywa się poprzez zliczanie do pewnej wartości za pomocą rejestru R5. Po pomyślnym przeczekaniu drgań następuje inkrementacja licznika. Proces eliminacji drgań może zostać przerwany przez wciśnięcie przycisku CLR, w takim przypadku licznik jest zerowany a proces inkrementacji zostaje przerwany. Po zakończeniu zerowania lub inkremetacji licznika, zerowany jest rejestr R5 oraz włączane są przerwania przycisku zliczającego, następnie mikrokontroler ponownie jest usypiany.
 
 Na podstawie grafu powstał kod napisany w języku Assembly.
 
@@ -77,6 +77,32 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 
 \section{Program}
 %TODO Opis kodu
+\subsection{init}
+
+		Na samym początku programu ustawiany jest wskaźnik stosu i wyłączany niepotrzebny w naszym obecnym projekcie watchdog, który nieobsłużony powodowałby niepożądany reset mikrokontrolera.
+		W bloku \textit{Init} następuje ustawienie podstawowych flag przed rozpoczęciem działania licznika, a więc:
+		\begin{itemize}
+			\item następuje przypisanie przycisków zliczania i resetu do odpowiednich linii portów
+			\item następuje odblokowanie przerwań portów, do których są podłączone przyciski
+			\item następuje wyzerowanie rejestrów do debouncingu (\textit{R5}) i flagi przerwania resetującego (\textit{R6})
+			\item skonfigurowanie odpowiednich portów
+		\end{itemize}
+
+		W następnym bloku procesor od razu jest wprowadzany w stan oszczędzania energii LPM4 (wyłączone wszystkie zegary i procesor), z którego może być wybudzony tylko przerwaniem przyciski CLK bądź CLR.
+
+		Po wystąpieniu przerwania od przycisku zliczania resetowane są flagi odpowiedzialne za oszczędzanie energii, aby procesor mógł przejść po jego obsłudze do pętli głównej zamiast wrócić do stanu uśpienia. Blokowane są również przerwania od zliczania, aby podczas wykonywania instrukcji z pętli głównej nie były cały czas zgłaszane przerwania z przycisku do zliczania. Po powrocie z przerwania następuje przejście do procedury \textit{loop\_1}.
+
+		Po wystąpieniu przerwania resetującego resetowany jest licznik główny, resetowane są flagi przerwań obu przycisków, aby po wyjściu z przerwania nie zgłaszały się one nieustannie, oraz blokowana jest maska przerwania zliczającego, aby nie mogło się ono wywołać po wyjściu z obsługi przerwania resetującego (mogło by, bo resetujemy flagę przerwania resetującego). Następnie resetujemy rejestr odpowiedzialny za czas debouncingu i ustwiana jest nasza flaga oznajmiająca wystąpienie przerwania resetującego (rejestr \textit{R6}) i podobnie jak w przerwaniu przycisku zliczającego modyfikujemy stos, aby po wyjściu z przerwania nie wrócić do stanu oszczędzania energii, tylko pracować z pełną mocą.
+
+\subsection{loop\_1}
+		Pierwszą instrukcją, jaka jest wykonywana w tej procedurze, jest sprawdzenie wciśnięcia przycisku resetu. Jeśli jest on wciśnięty, następuje zapętlenie do loop\_1. Jeśli nie jest, prównywana jest z jedynką wartość rejestru odpowiedzialnego za informację o przerwaniu resetującym. Jeśli wcześniej wystąpiło przerwanie resetujące (\textit{R6} został ustaw ustawiony), następuje skok do procedury \textit{loop\_3}, jeśli natomiast przerwanie CLR nie wystąpiło, następuje debouncjing przcisku CLK. W przypadku puszczenia przycisku przed doliczeniem do wartości testowej (ustaliliśmy wspólnie, że wystarczająca wartością będzie 0x04FF) następuje przeskok do \textit{loop\_3}. Jeśli debouncing zostanie zakończony pomyślnie, porównywana jest wartość aktualna licznika z wartością ustawioną na przełącznikach szesnatkowych. Jeśli wartość na przełącznikach jest równa bądź z jakiegoś powodu mniejsza niż aktualna wartość licznika głównego, jest on resetowany i program skacze do procedury \textit{loop\_3}. Jeśli wartość licznika jest poniżej granicy, następuje jego inkrementacja i przejście do procedury \textit{loop\_3}.
+
+\subsection{loop\_3}
+
+		W tej procedurze następuje czyszczenie rejestru debouncingu, reset flagi przerwania zliczającego i reset rejestru wystąpienia przerwania resetującego. Następnie odblokowane zostają przerwania od CLK i następuje powrót do stanu oszczędzania energii.
+
+
+
 
 %TODO kod
 \lstinputlisting[lastline=55]{src/main.asm}
