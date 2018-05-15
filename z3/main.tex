@@ -61,28 +61,29 @@ Zaprojektowany przed laboratorium układ zbudowaliśmy z następujących układ�
 Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał ogólny schemat działania licznika.
 %TODO ogarnąć grafuu
 
-%\begin{figure}[H]
-	%\centering
-	%\includegraphics[width=0.72\textwidth]{img/graph.png}
-	%\caption{Graf automatu stanów}
-	%\label{fig:graph}
-%\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{assets/graph.png}
+	\caption{Graf automatu stanów}
+	\label{fig:graph}
+\end{figure}
 
 
 Na początku pracy, mikrokontroler znajduje się w stanie uśpienia. Wybudzenie następuje tylko w przypadku wystąpienia przerwania z portu P1 (zbocze przycisku CLK) lub portu P2 (zbocze przycisku CLR). Następnie następuje przejście do obsługi zgłoszonego przerwania. W przypadku przerwania od przycisku CLK, wyłączane są tylko przerwania generowane przez ten przycisk oraz trwale wybudzany jest mikrokontroler (przejście do pętli głównej programu). W przypadku perwania od przycisku CLR zerowane jest wyjście licznika, zerowana jest zawartość rejestru służącego do usuwania drgań styków (rejest R5) oraz wyłączane są przerwania od przycisku CLK (na czas trzymania wciśniętego przycisku CLR nie chcemy by istaniała możliwość wywołania przerwania zliczającego). Wybudzany jest także trwale mikrokontroler. Przerwania zliczające mogą być wywoływane tylko w momencie gdy mikrokontroler jest w stanie uśpienia, natomiast przerwania zerujące mogą być wywoływane w każdym miejscu poza sekcją krytyczną związaną z inkrementacją licznika. Przerwania nie mogą być zagnieżdżane. W pętli głównej programu, sprawdzane jest czy wciśnięty jest przycisk zerujący (w przypadku zerowania licznika blokujemy możliwośc inkrementacji do momentu puszczeniu przycisku CLR) oraz czy wciśnięty jest przycisk zliczania (eliminacja drgań w przypadku inkrementacji licznika). Eliminacja drgań odbywa się poprzez zliczanie do pewnej wartości za pomocą rejestru R5. Po pomyślnym przeczekaniu drgań następuje inkrementacja licznika. Proces eliminacji drgań może zostać przerwany przez wciśnięcie przycisku CLR, w takim przypadku licznik jest zerowany a proces inkrementacji zostaje przerwany. Po zakończeniu zerowania lub inkremetacji licznika, zerowany jest rejestr R5 oraz włączane są przerwania przycisku zliczającego, następnie mikrokontroler ponownie jest usypiany.
 
 Na podstawie grafu powstał kod napisany w języku Assembly.
 
+\pagebreak
+
 \section{Program}
 %TODO Opis kodu
 
 %TODO kod
-%\noindent\begin{minipage}{.45\textwidth}
-	%\lstinputlisting[lastline=50]{src/main.lst}
-%\end{minipage}\hfill
-%\noindent\begin{minipage}{.45\textwidth}
-	%\lstinputlisting[firstline=51]{src/main.lst}
-%\end{minipage}\hfill
+\lstinputlisting[lastline=55]{src/main.asm}
+
+\pagebreak
+
+\lstinputlisting[firstline=56]{src/main.asm}
 
 \pagebreak
 
