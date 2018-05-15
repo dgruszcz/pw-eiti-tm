@@ -1,0 +1,25 @@
+digraph {
+    graph [pad="0.4", nodesep="1.25", bgcolor="#fdf6e3"]
+    node [color="#002b36", fontcolor="#073642"]
+    edge [fontsize="10"]
+    
+    slp  [label="Uśpienie"]
+    clr  [label="ISR\nZerowanie"]
+    cnt  [label="ISR\nZliczanie"]
+    cup  [label="Przygotowanie do uśpienia"]
+    pin  [label="Sekcja krytyczna"]
+    mlp  [label="Pętla główna \n (Debouncing)"]
+    
+    slp -> clr [label="CLR↘ \n ────────── ", color="#b58900", fontcolor="#b58900"]
+    mlp -> clr [label="CLR↘ \n ────────── ", color="#cb4b16", fontcolor="#cb4b16"]
+    clr -> mlp [label="────────── \n CNT = 0", color="#dc322f", fontcolor="#dc322f"]
+    slp -> cnt [label="CLK↘ \n ────────── ", color="#d33682", fontcolor="#d33682"]
+    cnt -> mlp [label="────────── \n dint(CLK)", color="#6c71c4", fontcolor="#6c71c4"]
+    mlp -> mlp [label="CLK == 0 \n && \n R5 != 0x04FF \n ────────── \n R5++", color="#268bd2", fontcolor="#268bd2"]
+    mlp -> pin [label="CLK == 0 \n && \n R5 == 0x04FF \n ──────────", color="#2aa198", fontcolor="#2aa198"]
+    pin -> cup [label="CNT < MAX \n ────────── \n CNT++", color="#859900", fontcolor="#859900"]
+    pin -> cup [label="CNT >= MAX \n ────────── \n CNT = 0", color="#b58900", fontcolor="#b58900"]
+    mlp -> cup [label="CLK == 1 \n && \n R5 != 0x04FF \n ──────────", color="#cb4b16", fontcolor="#cb4b16"]
+    cup -> slp [label="────────── \n R5 = 0, eint(CLK)", color="#dc322f", fontcolor="#dc322f"]
+    cup -> clr [xlabel="CLR↘ \n ────────── ", color="#d33682", fontcolor="#d33682"]
+}
