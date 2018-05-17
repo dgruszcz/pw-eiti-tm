@@ -9,8 +9,9 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
 ;-------------------------------------------------------------------------------
 ; Init
 ;-------------------------------------------------------------------------------
-            CLK_BUT .set 0x08       ; Przycisk CLK
-            CLR_BUT .set 0x01       ; Przycisk CLR
+CLK_BUT .set 0x02       ; Przycisk CLK
+CLR_BUT .set 0x01       ; Przycisk CLR
+DEB_TIM .set 0x04ff		; czas debouncingu
 
             mov.b   #0xff, P3DIR    ; Set P3 as output
 
@@ -18,7 +19,7 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
             mov.b   #CLR_BUT, P1IE
 
             bis.b   #CLK_BUT, P2IES ; Konfiguracja przerwan CLK
-            mov.b   #CLK_BUT, P2IE 
+            mov.b   #CLK_BUT, P2IE
 
             mov.w   #0x00, R5       ; Debouncing register
             mov.w   #0x00, R6       ; Rejestr pomocniczy
@@ -36,20 +37,45 @@ loop_1:
             bit.b   #0x01, R6
             jnz     loop_3
             bit.b   #CLK_BUT, P2IN
-            jnz     loop_3
+            jnz     no_inc
             inc     R5
+no_inc:
+			inc		R7
             dint
-            cmp     #0x04FF, R5
+            cmp     #DEB_TIM, R7
             jnz     loop_1
+            cmp 	#0, R5
+            jz		loop_3
+            cmp     R5, R7
+            jz		main_inc
+			clr		R5
+			clr 	R7
+
+			jmp		loop_1
+
+
+
+
+main_inc:
+			bit.w	#0x02, R6
+        	jnz		loop_3
+            bis.w	#0x02, R6
             cmp     P4IN, P3OUT
             jl      loop_2
             mov.b   #0x00, P3OUT
-            jmp     loop_3
+           	clr		R5
+            clr		R7
+            jmp     loop_1
 loop_2:
             inc     P3OUT
+            clr		R5
+            clr		R7
+            jmp		loop_1
+
 loop_3:
             eint
             clr     R5
+            clr 	R7
             bic.b   #CLK_BUT, P2IFG
             dint
             clr     R6
@@ -86,3 +112,4 @@ isrP2:      ; Przerwania przycisku CLK
             .short  isrP1
             .sect   ".int01"
             .short  isrP2
+
