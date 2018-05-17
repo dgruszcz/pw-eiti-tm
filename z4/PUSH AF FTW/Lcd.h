@@ -6,4 +6,5 @@ typedef struct Lcd {
 } Lcd;
 
 Lcd *lcdInit();
-void lcdUpdateDigit(Lcd *lcd, int digit);
+void lcdUpdateDigit(Lcd *lcd);
+void lcdDisplaySeconds(Lcd *lcd, int seconds);
