@@ -63,7 +63,7 @@ Projektowanie rozpoczęliśmy od stworzenia grafu stanów, który przedstawiał 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{assets/graph.png}
+	\includegraphics[width=0.9\textwidth]{assets/graph.png}
 	\caption{Graf automatu stanów}
 	\label{fig:graph}
 \end{figure}
@@ -84,9 +84,9 @@ Proces eliminacji drgań może zostać przerwany przez wciśnięcie przycisku CL
 
 Na podstawie grafu powstał kod napisany w języku Assembly.
 
+\pagebreak
 
-
-\section{Kod programu oraz jego opis}
+\section{Program}
 
 \subsection{Blok Init}
 		Na samym początku programu ustawiany jest wskaźnik stosu i wyłączany niepotrzebny w naszym obecnym projekcie watchdog, który nieobsłużony powodowałby niepożądany reset mikrokontrolera.
@@ -119,10 +119,13 @@ Na podstawie grafu powstał kod napisany w języku Assembly.
 
 		Wyłączanie przerwań jest konieczne również w trakcie wchodzenia do procedury \textit{loop\_3} oraz jej wykonywania. Wywołanie przerwania CLR w trakcie jej wykonywania, co prawda powodowałoby zerowanie licznika, lecz zaraz po nim procesor lądowałby w stanie uśpienia z włączonymi przerwaniami zliczającymi i mimo, że przycisk byłby nadal wciśnięty, istniałaby możliwość inkrementacji licznika. Dodatkowo zgłoszenie przerwania przycisku zliczającego zaraz po aktywacji jego przerwań powodowałaby blokowanie możliwości inkrementacji licznika (w trakcie obsługi przerwania zliczającego, przerwania te są trwale wyłączane) - procesor byłby usypiany z wyłączonymi przerwaniami zliczającymi.
 
+\pagebreak
 
-\textbf{Kod programu:}
+\lstinputlisting[lastline=55]{src/main.asm}
 
-\lstinputlisting{src/main.asm}
+\pagebreak
+
+\lstinputlisting[firstline=56]{src/main.asm}
 
 
 
