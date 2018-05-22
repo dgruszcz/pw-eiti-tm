@@ -9,9 +9,9 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
 ;-------------------------------------------------------------------------------
 ; Init
 ;-------------------------------------------------------------------------------
-CLK_BUT .set 0x02       ; Przycisk CLK
+CLK_BUT .set 0x08       ; Przycisk CLK
 CLR_BUT .set 0x01       ; Przycisk CLR
-DEB_TIM .set 0x04ff		; czas debouncingu
+DEB_TIM .set 0x00ff		; czas debouncingu
 
             mov.b   #0xff, P3DIR    ; Set P3 as output
 
@@ -58,7 +58,9 @@ no_inc:
 
 main_inc:
 			bit.w	#0x02, R6
-        	jnz		loop_3
+			clr		R5
+			clr 	R7
+        	jnz		loop_1
             bis.w	#0x02, R6
             cmp     P4IN, P3OUT
             jl      loop_2
