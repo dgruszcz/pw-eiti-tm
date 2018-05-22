@@ -9,21 +9,22 @@ StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL
 ;-------------------------------------------------------------------------------
 ; Init
 ;-------------------------------------------------------------------------------
-            CLK_BUT .set 0x08       ; Przycisk CLK
-            CLR_BUT .set 0x01       ; Przycisk CLR
+CLK_BUT .set 0x08       ; Przycisk CLK
+CLR_BUT .set 0x01       ; Przycisk CLR
+DEB_TIM .set 0x00ff		; czas debouncingu
 
-            mov.b   #0xff, P3DIR    ; Set P3 as output
+            mov.b   #0xff, &P3DIR    ; Set P3 as output
 
-            bis.b   #CLR_BUT, P1IES ; Konfiguracja przerwan CLR
-            mov.b   #CLR_BUT, P1IE
+            bis.b   #CLR_BUT, &P1IES ; Konfiguracja przerwan CLR
+            mov.b   #CLR_BUT, &P1IE
 
-            bis.b   #CLK_BUT, P2IES ; Konfiguracja przerwan CLK
-            mov.b   #CLK_BUT, P2IE 
+            bis.b   #CLK_BUT, &P2IES ; Konfiguracja przerwan CLK
+            mov.b   #CLK_BUT, &P2IE
 
             mov.w   #0x00, R5       ; Debouncing register
             mov.w   #0x00, R6       ; Rejestr pomocniczy
 
-            mov.b   #0x00, P3OUT
+            mov.b   #0x00, &P3OUT
 ;-------------------------------------------------------------------------------
 ; Main loop
 ;-------------------------------------------------------------------------------
@@ -31,46 +32,70 @@ loop:
             bis     #GIE+CPUOFF+SCG1+SCG0, SR
 loop_1:
             eint
-            bit.b   #CLR_BUT, P1IN
+            bit.b   #CLR_BUT, &P1IN
             jz      loop_1
             bit.b   #0x01, R6
-            jnz     loop_3
-            bit.b   #CLK_BUT, P2IN
-            jnz     loop_3
-            inc     R5
             dint
-            cmp     #0x04FF, R5
-            jnz     loop_1
-            cmp     P4IN, P3OUT
-            jl      loop_2
-            mov.b   #0x00, P3OUT
-            jmp     loop_3
-loop_2:
-            inc     P3OUT
-loop_3:
+            jnz     loop_3
             eint
-            clr     R5
-            bic.b   #CLK_BUT, P2IFG
+            bit.b   #CLK_BUT, &P2IN
+            jnz     no_inc
+            inc     R5
+no_inc:
+			inc		R7
+            cmp     #DEB_TIM, R7
+            jnz     loop_1
             dint
+            cmp 	#0, R5
+            jz		loop_3
+            cmp     R5, R7
+            jz		main_inc
+			eint
+			call	#clear
+			jmp		loop_1
+
+main_inc:
+			bit.w	#0x02, R6
+			call	#clear
+        	jnz		loop_1
+            bis.w	#0x02, R6
+            cmp     &P4IN, &P3OUT
+            jl      loop_2
+            mov.b   #0x00, &P3OUT
+           	call	#clear
+            jmp     loop_1
+loop_2:
+            inc     &P3OUT
+            call	#clear
+            jmp		loop_1
+
+loop_3:
+            call	#clear
+            bic.b   #CLK_BUT, &P2IFG
             clr     R6
-            bis.b   #CLK_BUT, P2IE
+            bis.b   #CLK_BUT, &P2IE
             jmp     loop
+
+clear:
+            clr     R5
+            clr 	R7
+            ret
 ;-------------------------------------------------------------------------------
 ; ISRs
 ;-------------------------------------------------------------------------------
 isrP1:      ; Przerwania przycisku CLR
-            mov.b   #0x00, P3OUT
-            bic.b   #CLR_BUT, P1IFG
-            bic.b   #CLK_BUT, P2IFG
-            bic.b   #CLK_BUT, P2IE
-            clr     R5
+            mov.b   #0x00, &P3OUT
+            bic.b   #CLR_BUT, &P1IFG
+            bic.b   #CLK_BUT, &P2IFG
+            bic.b   #CLK_BUT, &P2IE
+            mov     #0x01, R5
             bis.w   #0x01, R6
             bic     #CPUOFF+SCG1+SCG0, 0(SP)
             reti
 
 isrP2:      ; Przerwania przycisku CLK
             bic     #CPUOFF+SCG1+SCG0, 0(SP)
-            bic.b   #CLK_BUT, P2IE
+            bic.b   #CLK_BUT, &P2IE
             reti
 ;-------------------------------------------------------------------------------
 ; Stack Pointer definition
@@ -86,3 +111,4 @@ isrP2:      ; Przerwania przycisku CLK
             .short  isrP1
             .sect   ".int01"
             .short  isrP2
+

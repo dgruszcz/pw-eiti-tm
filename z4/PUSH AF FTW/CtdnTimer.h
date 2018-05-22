@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct CtdnTimer {
 	uint16_t seconds;
@@ -6,4 +7,4 @@ typedef struct CtdnTimer {
 
 CtdnTimer *ctdnTimerInit();
 void ctdnTimerDecrement(CtdnTimer *ctdnTimer);
-void ctdnTimerSetSeconds(CtdnTimer *ctdnTimer, uint16_t seconds);
+void ctdnTimerSetSeconds(CtdnTimer *ctdnTimer, int16_t seconds);

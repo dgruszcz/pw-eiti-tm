@@ -1,12 +1,16 @@
 #include "Lcd.h"
 
-Lcd *lcdInit() {
-	P4DIR = 0xff;	// segment selection
-	P3DIR = 0xff;	// digit selection
-    P3OUT = 0xff;
-    P4OUT = 0xff;
+Lcd *lcdInit(volatile unsigned char *segDir, volatile unsigned char *segOut, volatile unsigned char *digitDir, volatile unsigned char *digitOut) {
+	*segDir = 0xff;	// segment selection
+	*digitDir = 0xff;	// digit selection
+    *segOut = 0xff;
+    *digitOut = 0xff;
 
-    Lcd *lcd = malloc(sizeof(Lcd));
+    Lcd *lcd = malloc((size_t) sizeof(Lcd));
+    lcd->segDir = segDir;
+    lcd->segOut = segOut;
+    lcd->digitDir = digitDir;
+	lcd->digitOut = digitOut;
     lcd->nextDigit = 0;
     int i;
     for (i = 0; i < 4; i++) {
@@ -16,15 +20,15 @@ Lcd *lcdInit() {
 }
 
 void lcdUpdateDigit(Lcd *lcd) {
-	P3OUT = 0xff;
+	*(lcd->digitOut) = 0xff;
 
 	if (lcd->nextDigit == 2) {
-		P4OUT = 112 + lcd->digits[lcd->nextDigit];
+		*(lcd->segOut) = 112 + lcd->digits[lcd->nextDigit];
 	} else {
-		P4OUT = 224 + lcd->digits[lcd->nextDigit];
+		*(lcd->segOut) = 224 + lcd->digits[lcd->nextDigit];
 	}
 
-	P3OUT = ~(1 << lcd->nextDigit);
+	*(lcd->digitOut) = ~(1 << lcd->nextDigit);
 
 	lcd->nextDigit = (lcd->nextDigit + 1) % 4;
 }
