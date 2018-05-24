@@ -3,6 +3,7 @@
 #include "Lcd.h"
 #include "CtdnTimer.h"
 #include "Buttons.h"
+#include "Synth.h"
 
 #define ONE_SECOND 32768
 #define REFRESH_PERIOD ONE_SECOND / 60 / 4
@@ -19,9 +20,14 @@ CtdnTimer *ctdnTimer;
 Buttons *buttons;
 Synth *synth;
 
+void startSynth();
+
 void main(void) {
 
 	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+
+	P4DIR |= 8;
+	P4SEL |= 8;
 
     TACTL = TASSEL_1 | MC_1;
     TACCTL0 = CCIE;
@@ -35,7 +41,11 @@ void main(void) {
     TBCCTL2 = CCIE;
     TBCCR2 = SET_PERIOD;
 
-    lcd = lcdInit(&P5DIR, &P5OUT, &P1DIR, &P1OUT);
+	TBCCTL4 |= CCIE;
+	TBCCR4 = TBR + 100;
+	TBCCTL4 |= OUTMOD_4;
+
+    lcd = lcdInit(&P6DIR, &P6OUT, &P3DIR, &P3OUT);
     ctdnTimer = ctdnTimerInit();
     buttons = buttonsInit();
     synth = synthInit(pitches, lengths, 9);
@@ -64,9 +74,22 @@ void main(void) {
     }
 }
 
+void startSynth() {
+//	uint16_t duration = synthUpdateDuration(synth);
+//	uint16_t pitch = synthUpdatePitch(synth);
+//	TBCCTL3 |= CCIE;
+//	TBCCR3 = TBR + duration;
+//	TBCCTL4 |= CCIE;
+//	TBCCR4 = TBR + pitch;
+//	TBCCTL4 |= OUTMOD_4;
+//	synthStart(synth);
+}
+
 #pragma vector=TIMERA0_VECTOR
 __interrupt void Timer_A0 (void) {  // licznik sekund
-	ctdnTimerDecrement(ctdnTimer);
+	if (ctdnTimerDecrement(ctdnTimer)) {
+		startSynth();
+	}
 	LPM1_EXIT;
 }
 
@@ -95,5 +118,25 @@ __interrupt void Timer_B1 (void) {
 		}
 		TBCCR2 += SET_PERIOD / (buttons->held > 1000 * BUTTON_PERIOD ? 10 * BUTTON_PERIOD + 1 : (buttons->held / 100) + 1);
 		LPM1_EXIT;
+	}
+	if (tbiv == TBIV_TBCCR3) { // interwal dlugosci nuty
+		uint16_t duration = synthUpdateDuration(synth);
+		if (duration == 0) {
+			TBCCTL3 &= ~CCIE;
+			synth->index = 0;
+		} else {
+			TBCCR3 += duration;
+		}
+	}
+	if (tbiv == TBIV_TBCCR4) { // interwal czestotliwosci nuty
+//		uint16_t pitch = synthUpdatePitch(synth);
+//		if (pitch == 0) {
+//			TBCCTL4 &= ~CCIE;
+//			TBCCTL4 &= ~OUTMOD_4;
+//			TBCCTL4 &= ~OUT;
+//		} else {
+//			TBCCR4 += pitch;
+//		}
+		TBCCR4 += 100;
 	}
 }
