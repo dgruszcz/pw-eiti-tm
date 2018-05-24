@@ -11,9 +11,13 @@
 #define DEBOUNCING_PERIOD 2
 
 
+uint16_t pitches[] = {D3, E3, F3, G3, E3, C3, D3, D3, D3};
+uint16_t lengths[] = {EIGTH, EIGTH, EIGTH, EIGTH, QUARTER, EIGTH, EIGTH, HALF, HALF};
+
 Lcd *lcd;
 CtdnTimer *ctdnTimer;
 Buttons *buttons;
+Synth *synth;
 
 void main(void) {
 
@@ -34,6 +38,7 @@ void main(void) {
     lcd = lcdInit(&P5DIR, &P5OUT, &P1DIR, &P1OUT);
     ctdnTimer = ctdnTimerInit();
     buttons = buttonsInit();
+    synth = synthInit(pitches, lengths, 9);
 
     __bis_SR_register(GIE);
 
