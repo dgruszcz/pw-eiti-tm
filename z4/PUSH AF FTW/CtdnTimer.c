@@ -6,10 +6,14 @@ CtdnTimer *ctdnTimerInit() {
 	return ctdnTimer;
 }
 
-void ctdnTimerDecrement(CtdnTimer *ctdnTimer) {
+uint8_t ctdnTimerDecrement(CtdnTimer *ctdnTimer) {
+	uint16_t seconds = ctdnTimer->seconds;
+
 	if (ctdnTimer->seconds != 0) {
 		ctdnTimer->seconds--;
 	}
+
+	return seconds == 1;
 }
 
 void ctdnTimerSetSeconds(CtdnTimer *ctdnTimer, int16_t seconds) {
