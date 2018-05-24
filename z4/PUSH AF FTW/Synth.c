@@ -11,7 +11,8 @@ Synth *synthInit(uint16_t *pitches, uint16_t *durations, uint16_t length) {
 
 uint16_t synthUpdatePitch(Synth *synth) {
   if (synth->paused || synth->index >= synth->length) {
-    return 0;
+	synth->paused = 1;
+	return 0;
   }
 
   return synth->pitches[synth->index];
@@ -19,6 +20,7 @@ uint16_t synthUpdatePitch(Synth *synth) {
 
 uint16_t synthUpdateDuration(Synth *synth) {
   if (synth->paused || synth->index >= synth->length) {
+	synth->paused = 1;
     return 0;
   }
 
