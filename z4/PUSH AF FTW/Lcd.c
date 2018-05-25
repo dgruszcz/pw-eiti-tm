@@ -19,7 +19,7 @@ Lcd *lcdInit(volatile unsigned char *segDir, volatile unsigned char *segOut, vol
     return lcd;
 }
 
-void lcdUpdateDigit(Lcd *lcd) {
+void lcdUpdateDigit(Lcd *lcd, char isCounting) {
 	*(lcd->digitOut) = 0xff;
 
 	if (lcd->nextDigit == 2) {
@@ -28,9 +28,13 @@ void lcdUpdateDigit(Lcd *lcd) {
 		*(lcd->segOut) = 224 + lcd->digits[lcd->nextDigit];
 	}
 
+	if (lcd->nextDigit == 4) {
+		*(lcd->segOut) = 224 + (isCounting ? 14 : 10);
+	}
+
 	*(lcd->digitOut) = ~(1 << lcd->nextDigit);
 
-	lcd->nextDigit = (lcd->nextDigit + 1) % 4;
+	lcd->nextDigit = (lcd->nextDigit + 1) % 5;
 }
 
 void lcdDisplaySeconds(Lcd *lcd, int seconds) {
