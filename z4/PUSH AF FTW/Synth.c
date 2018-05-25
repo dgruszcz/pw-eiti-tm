@@ -7,15 +7,12 @@ Synth *synthInit(uint16_t *pitches, uint16_t *durations, uint16_t length) {
   synth->length = length;
   synth->index = 0;
   synth->paused = 1;
+
+  return synth;
 }
 
 uint16_t synthUpdatePitch(Synth *synth) {
-  if (synth->paused || synth->index >= synth->length) {
-	synth->paused = 1;
-	return 0;
-  }
-
-  return synth->pitches[synth->index];
+  return synth->pitches[synth->index - 1];
 }
 
 uint16_t synthUpdateDuration(Synth *synth) {
@@ -27,11 +24,11 @@ uint16_t synthUpdateDuration(Synth *synth) {
   return synth->durations[synth->index++];
 }
 
-uint16_t synthStop(Synth *synth) {
+void synthStop(Synth *synth) {
   synth->paused = 1;
 }
 
-uint16_t synthStart(Synth *synth) {
+void synthStart(Synth *synth) {
   synth->index = 0;
   synth->paused = 0;
 }
