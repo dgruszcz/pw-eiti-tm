@@ -1,3 +1,6 @@
+#ifndef LCD_H_
+#define LCD_H_
+
 #include <msp430.h>
 #include <stdlib.h>
 
@@ -8,5 +11,7 @@ typedef struct Lcd {
 } Lcd;
 
 Lcd *lcdInit(volatile unsigned char *segDir, volatile unsigned char *segOut, volatile unsigned char *digitDir, volatile unsigned char *digitOut);
-void lcdUpdateDigit(Lcd *lcd);
+void lcdUpdateDigit(Lcd *lcd, char isCounting);
 void lcdDisplaySeconds(Lcd *lcd, int seconds);
+
+#endif /* LCD_H_ */
