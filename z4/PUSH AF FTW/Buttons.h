@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 typedef struct Buttons {
-	uint8_t states[2];
-	uint8_t statesPending[2];
+	uint8_t states[3];
+	uint8_t statesPending[3];
 	uint32_t held;
 } Buttons;
 
