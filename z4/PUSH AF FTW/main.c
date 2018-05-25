@@ -12,8 +12,8 @@
 #define DEBOUNCING_PERIOD 2
 
 
-uint16_t pitches[] = {D3, E3, F3, G3, E3, C3, D3, D3, D3};
-uint16_t lengths[] = {EIGTH, EIGTH, EIGTH, EIGTH, QUARTER, EIGTH, EIGTH, HALF, HALF};
+uint16_t pitches[] = {D5, E5, F5, G5, E5, C5, D5, D5, 0};
+uint16_t durations[] = {EIGTH, EIGTH, EIGTH, EIGTH, QUARTER, EIGTH, EIGTH, HALF, HALF};
 
 Lcd *lcd;
 CtdnTimer *ctdnTimer;
@@ -23,11 +23,13 @@ Synth *synth;
 void startSynth();
 
 void main(void) {
-
 	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-	P4DIR |= 8;
-	P4SEL |= 8;
+	BCSCTL1 = RSEL2 | RSEL1 | RSEL0;
+	DCOCTL = DCO2 | DCO1 | DCO0;
+
+	P4DIR |= BIT4;
+	P4SEL |= BIT4;
 
     TACTL = TASSEL_1 | MC_1;
     TACCTL0 = CCIE;
@@ -41,14 +43,10 @@ void main(void) {
     TBCCTL2 = CCIE;
     TBCCR2 = SET_PERIOD;
 
-	TBCCTL4 |= CCIE;
-	TBCCR4 = TBR + 100;
-	TBCCTL4 |= OUTMOD_4;
-
     lcd = lcdInit(&P6DIR, &P6OUT, &P3DIR, &P3OUT);
     ctdnTimer = ctdnTimerInit();
     buttons = buttonsInit();
-    synth = synthInit(pitches, lengths, 9);
+    synth = synthInit(pitches, durations, 9);
 
     __bis_SR_register(GIE);
 
@@ -64,7 +62,10 @@ void main(void) {
     	} else {
     		TACTL |= MC_1;
     	}
-    	if (buttons->statesPending[0] && buttons->held > DEBOUNCING_PERIOD) {
+    	if (buttons->states[2]) {
+    		ctdnTimerSetSeconds(ctdnTimer, 0);
+    	}
+    	else if (buttons->statesPending[0] && buttons->held > DEBOUNCING_PERIOD) {
     		ctdnTimerSetSeconds(ctdnTimer, ctdnTimer->seconds - (buttons->held > 25 * BUTTON_PERIOD ? 10 + (ctdnTimer->seconds % 10) : 1));
     	} else if (buttons->statesPending[1] && buttons->held >= DEBOUNCING_PERIOD) {
     		ctdnTimerSetSeconds(ctdnTimer, ctdnTimer->seconds + (buttons->held > 25 * BUTTON_PERIOD ? 10 - (ctdnTimer->seconds % 10) : 1));
@@ -75,14 +76,10 @@ void main(void) {
 }
 
 void startSynth() {
-//	uint16_t duration = synthUpdateDuration(synth);
-//	uint16_t pitch = synthUpdatePitch(synth);
-//	TBCCTL3 |= CCIE;
-//	TBCCR3 = TBR + duration;
-//	TBCCTL4 |= CCIE;
-//	TBCCR4 = TBR + pitch;
-//	TBCCTL4 |= OUTMOD_4;
-//	synthStart(synth);
+	synthStart(synth);
+	TBCCTL3 |= CCIE;
+	TBCCR3 = TBR;
+//	TBCCTL3 |= CCIFG;
 }
 
 #pragma vector=TIMERA0_VECTOR
@@ -95,7 +92,7 @@ __interrupt void Timer_A0 (void) {  // licznik sekund
 
 #pragma vector=TIMERB0_VECTOR
 __interrupt void Timer_B0 (void) {  // odswiezanie lcd
-	lcdUpdateDigit(lcd);
+	lcdUpdateDigit(lcd, TACTL & MC_1);
 	TBCCR0 += REFRESH_PERIOD;
 	LPM1_EXIT;
 }
@@ -106,6 +103,7 @@ __interrupt void Timer_B1 (void) {
 	if (tbiv == TBIV_TBCCR1) {	// interwal sprawdzania stanu przyciskow
 		buttons->states[0] = (~P2IN & (1 << 6)) ? 1 : 0;
 		buttons->states[1] = (~P2IN & (1 << 7)) ? 1 : 0;
+		buttons->states[2] = (~P2IN & (1 << 5)) ? 1 : 0;
 		TBCCR1 += BUTTON_PERIOD;
 		LPM1_EXIT;
 	}
@@ -116,6 +114,9 @@ __interrupt void Timer_B1 (void) {
 		if (buttons->states[1]) {
 			buttons->statesPending[1] = 1;
 		}
+		if (buttons->states[2]) {
+			buttons->statesPending[2] = 1;
+		}
 		TBCCR2 += SET_PERIOD / (buttons->held > 1000 * BUTTON_PERIOD ? 10 * BUTTON_PERIOD + 1 : (buttons->held / 100) + 1);
 		LPM1_EXIT;
 	}
@@ -123,20 +124,26 @@ __interrupt void Timer_B1 (void) {
 		uint16_t duration = synthUpdateDuration(synth);
 		if (duration == 0) {
 			TBCCTL3 &= ~CCIE;
+			TBCCTL4 &= ~CCIE;
+			TBCCTL4 &= ~OUTMOD_4;
+			TBCCTL4 &= ~OUT;
 			synth->index = 0;
 		} else {
+			uint16_t pitch = synthUpdatePitch(synth);
+			if (pitch == 0) {
+				TBCCTL4 &= ~CCIE;
+				TBCCTL4 &= ~OUTMOD_4;
+				TBCCTL4 &= ~OUT;
+			} else if (synth->index == 1 || synth->pitches[synth->index - 2] == 0) {
+				TBCCTL4 |= CCIE;
+				TBCCTL4 |= OUTMOD_4;
+				TBCCR4 = TBR + pitch / 2;
+			}
 			TBCCR3 += duration;
 		}
 	}
 	if (tbiv == TBIV_TBCCR4) { // interwal czestotliwosci nuty
-//		uint16_t pitch = synthUpdatePitch(synth);
-//		if (pitch == 0) {
-//			TBCCTL4 &= ~CCIE;
-//			TBCCTL4 &= ~OUTMOD_4;
-//			TBCCTL4 &= ~OUT;
-//		} else {
-//			TBCCR4 += pitch;
-//		}
-		TBCCR4 += 100;
+		uint16_t pitch = synthUpdatePitch(synth);
+		TBCCR4 += pitch / 2;
 	}
 }
