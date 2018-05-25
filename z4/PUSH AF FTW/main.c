@@ -6,7 +6,7 @@
 #include "Synth.h"
 
 #define ONE_SECOND 32768
-#define REFRESH_PERIOD ONE_SECOND / 60 / 4
+#define REFRESH_PERIOD ONE_SECOND / 60 / 5
 #define BUTTON_PERIOD ONE_SECOND / 100
 #define SET_PERIOD ONE_SECOND
 #define DEBOUNCING_PERIOD 2
@@ -56,12 +56,18 @@ void main(void) {
     	if (buttons->held == DEBOUNCING_PERIOD + 1) {
     		TBCCTL2 |= CCIFG;
     	}
+
     	if (buttons->states[0] || buttons->states[1]) {
     		TACTL &= ~(MC_1 | MC_0);
     		TACTL |= TACLR;
     	} else {
     		TACTL |= MC_1;
     	}
+
+    	if (buttons->states[0] || buttons->states[1] || buttons->states[2]) {
+    		synthStop(synth);
+    	}
+
     	if (buttons->states[2]) {
     		ctdnTimerSetSeconds(ctdnTimer, 0);
     	}
@@ -70,6 +76,7 @@ void main(void) {
     	} else if (buttons->statesPending[1] && buttons->held >= DEBOUNCING_PERIOD) {
     		ctdnTimerSetSeconds(ctdnTimer, ctdnTimer->seconds + (buttons->held > 25 * BUTTON_PERIOD ? 10 - (ctdnTimer->seconds % 10) : 1));
     	}
+
     	buttonsReset(buttons);
     	lcdDisplaySeconds(lcd, ctdnTimer->seconds);
     }
@@ -78,8 +85,7 @@ void main(void) {
 void startSynth() {
 	synthStart(synth);
 	TBCCTL3 |= CCIE;
-	TBCCR3 = TBR;
-//	TBCCTL3 |= CCIFG;
+	TBCCTL3 |= CCIFG;
 }
 
 #pragma vector=TIMERA0_VECTOR
@@ -138,6 +144,9 @@ __interrupt void Timer_B1 (void) {
 				TBCCTL4 |= CCIE;
 				TBCCTL4 |= OUTMOD_4;
 				TBCCR4 = TBR + pitch / 2;
+			}
+			if (synth->index == 1) {
+				TBCCR3 =TBR;
 			}
 			TBCCR3 += duration;
 		}
