@@ -1,5 +1,5 @@
-#ifndef SYNTH_H
-#define SYNTH_H
+#ifndef SYNTH_H_
+#define SYNTH_H_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -29,12 +29,24 @@
 #define A4  0
 #define As4 0
 #define B4  0
-#define C5  0
+#define C5  63
+#define Cs5 0
+#define D5  56
+#define Ds5 0
+#define E5  50
+#define F5  47
+#define Fs5 0
+#define G5  42
+#define Gs5 0
+#define A5  0
+#define As5 0
+#define B5  0
+#define C6  0
 
-// Durations @ 120 BPM @ 4/4
-#define EIGTH 8192
-#define QUARTER 16384
-#define HALF 32768
+// Durations @ 160 BPM @ 4/4
+#define EIGTH 6144
+#define QUARTER 12288
+#define HALF 24576
 
 typedef struct Synth {
   uint16_t *pitches;
@@ -47,7 +59,7 @@ typedef struct Synth {
 Synth *synthInit(uint16_t *pitches, uint16_t *durations, uint16_t length);
 uint16_t synthUpdatePitch(Synth *synth);
 uint16_t synthUpdateDuration(Synth *synth);
-uint16_t synthStop(Synth *synth);
-uint16_t synthStart(Synth *synth);
+void synthStop(Synth *synth);
+void synthStart(Synth *synth);
 
-#endif //SYNTH_H
+#endif /* SYNTH_H_ */
