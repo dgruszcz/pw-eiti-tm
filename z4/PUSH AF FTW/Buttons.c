@@ -12,4 +12,5 @@ Buttons *buttonsInit() {
 void buttonsReset(Buttons *buttons) {
 	buttons->statesPending[0] = 0;
 	buttons->statesPending[1] = 0;
+	buttons->statesPending[2] = 0;
 }
