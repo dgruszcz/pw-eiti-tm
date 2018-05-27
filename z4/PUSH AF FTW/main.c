@@ -4,6 +4,7 @@
 #include "CtdnTimer.h"
 #include "Buttons.h"
 #include "Synth.h"
+#include "melodies.h
 
 #define ONE_SECOND 32768
 #define REFRESH_PERIOD ONE_SECOND / 60 / 5
@@ -12,8 +13,9 @@
 #define DEBOUNCING_PERIOD 2
 
 
-uint16_t pitches[] = {D5, E5, F5, G5, E5, C5, D5, D5, 0};
-uint16_t durations[] = {EIGTH, EIGTH, EIGTH, EIGTH, QUARTER, EIGTH, EIGTH, HALF, HALF};
+uint16_t pitches[] = MEL_THELICK_P;
+uint16_t durations[] = MEL_THELICK_D;
+uint8_t length = MEL_THELICK_L;
 
 Lcd *lcd;
 CtdnTimer *ctdnTimer;
@@ -46,7 +48,7 @@ void main(void) {
     lcd = lcdInit(&P6DIR, &P6OUT, &P3DIR, &P3OUT);
     ctdnTimer = ctdnTimerInit();
     buttons = buttonsInit();
-    synth = synthInit(pitches, durations, 9);
+    synth = synthInit(pitches, durations, length);
 
     __bis_SR_register(GIE);
 
