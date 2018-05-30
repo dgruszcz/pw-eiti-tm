@@ -10,11 +10,17 @@ typedef struct CircularBuffer {
 	size_t size;
 	char *read;
 	char *write;
+	uint8_t readPointer;
+	uint8_t writePointer;
 } CircularBuffer;
 
 CircularBuffer *circularBufferInit(size_t size);
 size_t circularBufferRead(CircularBuffer *self, char *data, size_t length);
 size_t circularBufferWrite(CircularBuffer *self, char *data, size_t length);
 size_t freeSpace(CircularBuffer *self);
+
+size_t circularBufferRead1(CircularBuffer *self, char *data, size_t length);
+size_t circularBufferWrite1(CircularBuffer *self, char *data, size_t length);
+size_t freeSpace1(CircularBuffer *self);
 
 #endif /* CIRCULARBUFFER_H_ */
