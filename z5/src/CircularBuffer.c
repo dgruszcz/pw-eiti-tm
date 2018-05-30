@@ -80,11 +80,11 @@ size_t circularBufferRead1(CircularBuffer *self, char *data, size_t length) {
 
 	dataLength = length > dataLength ? dataLength : length;  // Ilosc bajtow do oczytania
 	read = dataLength;
-	while(dataLength--){
+	while (dataLength--){
     *(data++) = self->buffer[self->readPointer++ % self->size];
 	}
 
-	if(self->readPointer >= self->size && self->writePointer >= self->size){
+	if (self->readPointer >= self->size && self->writePointer >= self->size){
     self->readPointer = self->readPointer % self->size;
     self->writePointer = self->writePointer % self->size;
 	}
@@ -99,7 +99,7 @@ size_t circularBufferWrite1(CircularBuffer *self,char *data, size_t length) {
 
 	dataLength = length > dataLength ? dataLength : length;  // Ilosc bajtow mozliwych do zapisania
 	written = dataLength;
-	while(dataLength--){
+	while (dataLength--){
     self->buffer[self->writePointer++ % self->size] = *(data++);
 	}
 	return written;
