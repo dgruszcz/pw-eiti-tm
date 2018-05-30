@@ -59,3 +59,8 @@ size_t circularBufferWrite(CircularBuffer *self,char *data, size_t length) {
 
 	return written;
 }
+
+size_t freeSpace(CircularBuffer *self) {
+	size_t space = self->read - self->write;
+	return space > 0 ? space : self->size - space;
+}
