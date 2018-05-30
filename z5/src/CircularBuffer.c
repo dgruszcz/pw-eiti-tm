@@ -88,13 +88,11 @@ size_t circularBufferRead1(CircularBuffer *self, char *data, size_t length) {
     self->readPointer = self->readPointer % self->size;
     self->writePointer = self->writePointer % self->size;
 	}
-
 	return read;
 }
 
 size_t circularBufferWrite1(CircularBuffer *self,char *data, size_t length) {
 	size_t written = 0;
-
 	int dataLength = self->size - (self->writePointer - self->readPointer); // Dostepne miejsce w buforze
 
 	dataLength = length > dataLength ? dataLength : length;  // Ilosc bajtow mozliwych do zapisania
