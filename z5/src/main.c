@@ -1,9 +1,13 @@
 #include <msp430.h> 
 #include <stdint.h>
 #include "CircularBuffer.h"
+#include <ctype.h>
 
 CircularBuffer *rxBuf;
 CircularBuffer *txBuf;
+
+
+void send(char *data, size_t length);
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
@@ -27,32 +31,81 @@ int main(void) {
     IE1 = UTXIE0 | URXIE0;
     IFG1 &= ~UTXIFG0;
 
-    rxBuf = circularBufferInit(128);
-    txBuf = circularBufferInit(128);
+    rxBuf = circularBufferInit(5);
+    txBuf = circularBufferInit(5);
 
     __bis_SR_register(GIE);
 
-    while (1) {
+    char last[4] = "\00\00\00\00";
 
+    while (1) {
+    	if (!circularBufferRead(rxBuf, last+3, 1)) {
+			continue;
+    	}
+
+ 		char current = last[2];
+		if (current == '\00') {
+			int i = 0;
+			for (i; i < 4 - 1; i++) {
+				last[i] = last[i + 1];
+			}
+			continue;
+		}
+
+		// Usuwanie podwojnych liter
+		if (last[2] == last[3]) {
+			continue;
+		}
+
+		// Wykrywanie \s + "."
+		if (last[2] == ' ' && last[3] == '.') {
+			last[2]=last[3];
+			continue;
+		}
+
+		// Spacja po kropce
+		if(last[2] == '.' && last[3] != ' '){
+			 send(last + 2, 1);
+		    	int i = 0;
+		    	for (i; i < 2; i++) {
+		    		last[i] = last[i + 1];
+		    	}
+		    	last[2]= ' ';
+		}
+
+		// Duzy znak po spacji
+		if (last[2] == ' ') {
+			last[3] = (char)toupper(last[3]);
+		}
+
+		send(last + 2, 1);
+
+    	int i = 0;
+    	for (i; i < 4 - 1; i++) {
+    		last[i] = last[i + 1];
+    	}
     }
+}
+
+void send(char *data, size_t length) {
+	circularBufferWrite(txBuf, data, length);
+	// TODO
+	if (U0TCTL & TXEPT) {
+		circularBufferRead(txBuf, (char *) &TXBUF0, 1);
+		U0TCTL |= UTXE0;
+	}
 }
 
 #pragma vector=USART0RX_VECTOR
 __interrupt void USART0_RX (void) {
-	char *received = malloc(sizeof(char));
-	*received = RXBUF0;
-	circularBufferWrite(rxBuf, received, 1);
-	TXBUF0 = *received;
-	if (TXEPT) {
-//		circularBufferRead(rxBuf, (char *) received, 1);
-
-	}
-	free(received);
+	circularBufferWrite(rxBuf, (char *) &RXBUF0, 1);
 }
 
 #pragma vector=USART0TX_VECTOR
 __interrupt void USART0_TX (void) {
-//	if (TXEPT) {
-//		circularBufferRead(rxBuf, (char *) &TXBUF0, 1);
-//	}
+	U0TCTL &= ~UTXE0;
+	// TODO
+	if (circularBufferRead(txBuf, (char *) &TXBUF0, 1)) {
+		U0TCTL |= UTXE0;
+	}
 }
