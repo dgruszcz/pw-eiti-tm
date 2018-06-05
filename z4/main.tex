@@ -33,7 +33,7 @@
 	xleftmargin=\parindent,
 	language=C,
 	showstringspaces=false,
-	basicstyle=\footnotesize\ttfamily,JESTEM JESTEM
+	basicstyle=\footnotesize\ttfamily
 	keywordstyle=\bfseries\color{green!40!black},
 	commentstyle=\itshape\color{purple!40!black},
 	identifierstyle=\color{blue},
@@ -84,7 +84,27 @@ Ponieważ wyświetlacz dynamiczny, z którego korzystaliśmy w tym ćwiczeniu, m
 
 Po 20 próbkach odchylenie standardowe od jednej sekundy wynosiło $232.85$ $\mu$s, stwierdziliśmy że jest to wystarczająca dokładność do zrealizowania naszego zadania.
 
-Ostateczna postać minutnika posiadała pięć symboli, 2 cyfry odpowiedzialne za wyświetlanie minut (więc maksymalną wartością do ustawienia było $99:59$) oraz jeden symbol oznaczający tryb, w którym aktualnie znajduje się minutnik.
+Ostateczna postać minutnika posiada pięć symboli, 2 cyfry odpowiedzialne za wyświetlanie minut (więc maksymalną wartością do ustawienia było $99:59$) oraz jeden symbol oznaczający tryb, w którym aktualnie znajduje się minutnik. W zależności od tego, w którym trybie znajduje się system, na ostatnim miejscu wyświtelana jest litera \textbf{t} (zliczanie) lub \textbf {c} (zliczanie wyłączone).
+
+Każdy znak ma być wyświetlany z częstotliwością co najmniej $60$ Hz, dlatego przełączanie pojedynczego symbolu następuje z częstotliwością $32768 / 60 / 5$ Hz. Program został napisany w taki sposób, aby można było wygodnie zmieniać częstotliwość odświeżania pojedynczego symbolu.
+
+\section{Przyciski}
+
+W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port a następnie skonfigurowane do dowolnej linii, która jest w danym momencie wygodna. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
+
+
+\section{Timery}
+
+W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kanałów z timera B do obsługi sygnału zliczenia do zera oraz obsługi wyświetlacza. Działanie timera A jest ustawione w tryp \textbf{UP} w celu umożliwienia zliczania wciąż do wartości $32768$, a więc pełnej sekundy. Timer B ustawiony został w tryb \textbf{continuous}, aby móc ustawić odpowiednie interwały potrzebne do obsługi debouncingu przycisków, odświeżania wyświtlacza oraz generowania sygnału zakończenia mierzenia czasu. Kanały odpowiadają kolejno za:
+\begin{itemize}
+	\item  \textbf{TACCTR0} zliczanie pojedynczych sekund
+	\item  \textbf{TBCCTR0} częstotliwość odświeżania pojedynczego symbolu
+	\item  \textbf{TBCCTR1} okres sprawdzania przycisków
+	\item  \textbf{TBCCTR2} przyspieszanie zmiany wartości minutnika
+	\item  \textbf{TBCCTR3}
+\end{itemize}
+
+W systemie wykorzystujemy wszystko co popadnie (reaktor atomowy z regulatorem DMC już niebawem)
 
 
 
@@ -100,40 +120,35 @@ Ostateczna postać minutnika posiadała pięć symboli, 2 cyfry odpowiedzialne z
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
 
 
 
@@ -156,13 +171,16 @@ Ostateczna postać minutnika posiadała pięć symboli, 2 cyfry odpowiedzialne z
 
 
 \section{Usprawnienia oraz niezbędne modyfikacje projektu}
+
 Minutnik wzbogaciliśmy o kilka dodatkowych funkcjonalności. Są to między innymi sygnalizacja trybu w jakim aktualnie się znajduje, zerowanie zawartości oddzielnym przyciskiem oraz odgrywanie melodii sygnalizujacej zakończenie odliczania.
 
 Sygnalizacja trybu pracy odbywa się poprzez wyświetlanie na jednym z wyświetlaczy siedmiosegmentowych litery t gdy minutnik jest w trakcie odliczania lub litery c podczas gdy jest zatrzymany lub ustawiany jest czas zliczania.
 
-Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowania minutnika. Pozwala on także na wyłączenie alarmu sygnalizującego zliczanie.
+Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowania minutnika. Pozwala on także na wyłączenie alarmu sygnalizującego zakończenie zliczania.
 
-Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację odpowiednio skofnigurowanego sygnału PWM oraz odtwarzanie go za pomocą modułu głośniczka ze wzmacniaczem. Do ogdrywania melodii służy klasa Synth, która przechowuje interwały oraz częstotliwości każdej nuty, natomiast sygnał PWM generowany jest
+Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
+
+Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
 
 \pagebreak
 
@@ -219,7 +237,7 @@ Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zak
 \pagebreak
 
 \section{Możliwości udoskonalenia systemu}
-Możliwym udoskonaleniem
+Możliwym udoskonaleniem minutnika byłoby przesyłanie poprzez port szeregowy (na przykład za pomocą UART)
 
 \end{document}
 \grid
