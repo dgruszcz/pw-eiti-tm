@@ -162,7 +162,15 @@ Sygnalizacja trybu pracy odbywa się poprzez wyświetlanie na jednym z wyświetl
 
 Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowania minutnika. Pozwala on także na wyłączenie alarmu sygnalizującego zliczanie.
 
-Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację odpowiednio skofnigurowanego sygnału PWM oraz odtwarzanie go za pomocą modułu głośniczka ze wzmacniaczem. Do ogdrywania melodii służy klasa Synth, która przechowuje interwały oraz częstotliwości każdej nuty, natomiast sygnał PWM generowany jest
+Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
+
+Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{assets/synthdata.png}
+	\caption{Przykład transkrypcji przetłumaczonej na potrzeby syntezatora}
+\end{figure}
 
 \pagebreak
 
