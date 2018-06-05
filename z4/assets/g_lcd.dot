@@ -1,0 +1,21 @@
+digraph {
+    graph [pad="0.4", nodesep="1.25", bgcolor="#fdf6e3"]
+    node [color="#002b36", fontcolor="#073642"]
+    edge [fontsize="10"]
+    
+    {
+        rank="source";
+        Lcd [label=<Lcd<BR /><FONT POINT-SIZE="10">Wyświetlacz dynamiczny<BR /><BR />Pola:<BR />segOut (port wyj. seg.)<BR />digitOut (port wyj. wyboru pola)<BR />nextDigit (indeks nast. pola do odśw.)<BR />digits[] (wyśw. znaki)</FONT>> color="#859900"]
+    }
+    
+    {
+        lcdInit [color="#b58900"]
+        lcdUpdateDigit [label=<lcdUpdateDigit<BR /><FONT POINT-SIZE="10">Odśwież kolejne pole na wyświetlaczu<BR />(uruchamiane w ISR kanału timera)</FONT>>, color="#cb4b16"]
+        lcdDisplaySeconds [label=<lcdDisplaySeconds<BR /><FONT POINT-SIZE="10">Pokaż na wyświetlaczu zadany czas</FONT>>, color="#dc322f"]
+    }
+    
+    lcdInit -> Lcd [color="#b58900"]
+    lcdUpdateDigit -> Lcd [color="#cb4b16"]
+    lcdDisplaySeconds -> Lcd [color="#dc322f"]
+}
+ 

@@ -1,0 +1,23 @@
+digraph {
+    graph [pad="0.4", nodesep="1.25", bgcolor="#fdf6e3"]
+    node [color="#002b36", fontcolor="#073642"]
+    edge [fontsize="10"]
+    
+    {
+        rank="source";
+        CtdnTimer [label=<CtdnTimer<BR /><FONT POINT-SIZE="10">Licznik sekund<BR /><BR />Pola:<BR />seconds (l. sek. w liczniku)</FONT>> color="#268bd2"]
+    }
+
+    
+    {
+        ctdnTimerInit [color="#b58900"]
+        ctdnTimerDecrement [label=<ctdnTimerDecrement<BR /><FONT POINT-SIZE="10">Zdekrementuj licznik, minęła sekunda</FONT>>, color="#cb4b16"]
+        ctdnTimerSetSeconds [label=<ctdnTimerSetSeconds<BR /><FONT POINT-SIZE="10">Zaktualizuj zawartość licznika, użytkownik<BR />zmienił zadany czas</FONT>>, color="#dc322f"]
+    }
+    
+    ctdnTimerInit -> CtdnTimer [color="#b58900"]
+    ctdnTimerDecrement -> CtdnTimer [color="#cb4b16"]
+    ctdnTimerSetSeconds -> CtdnTimer [color="#dc322f"]
+    
+}
+ 
