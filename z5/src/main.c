@@ -16,6 +16,8 @@ char rxBufBuf[BUFFER_SIZE];
 void InitUART ();
 void InitDMA ();
 
+
+
 CircularBuffer *rxBuf;
 CircularBuffer *txBuf;
 
@@ -35,13 +37,13 @@ int main(void) {
 
     // Przelaczane MCLK na rezonator kwarcowy
  	BCSCTL1 |= XTS;
-
  	BCSCTL2 |= SELM_2;
  	int i;
  	do{
  	IFG1 &= ~OFIFG;
  	for(i = 0; i < 0xFF; ++i);
  	} while (IFG1 & OFIFG);
+
     rxBuf = circularBufferInit(BUFFER_SIZE, txBufBuf);
     txBuf = circularBufferInit(BUFFER_SIZE, rxBufBuf);
 
@@ -52,15 +54,27 @@ int main(void) {
     char last[] = "\00\00\00";
 
     while (1) {
+    	DMA0CTL &= ~DMAEN;
     	if (!circularBufferRead1(rxBuf, last+2, 1)) {
     		if (freeSpace1(rxBuf) == rxBuf->size) {
     			P1OUT &= ~CTS;
     		}
+    		DMA0CTL |= DMAEN;
 			continue;
     	}
+    	DMA0CTL |= DMAEN;
 
     // Poczatek pliku lub nowa linia
 		if (last[1] == '\00') {
+			if (last[2] == '\015'){
+				last[1] = 10;
+				send(last+1, 1);
+				send(last+2, 1);
+				last[1]='\00';
+				last[2]='\00';
+				continue;
+			}
+
 			last[2] = (char)toupper(last[2]);
 			last[0] = last[1];
 			last[1] = last[2];
@@ -68,7 +82,7 @@ int main(void) {
 		}
 
 		// Usuwanie powtorzonych znakow
-		if (toupper(last[1]) == toupper(last[2]) && last[2] != '\015') {
+		if (toupper(last[1]) == toupper(last[2])) {
 			continue;
 		}
 
@@ -103,11 +117,17 @@ int main(void) {
 		if (last[2] == '\015') {
 			send(last+1, 1);
 			last[1] = 10;
-			send(last+1, 2);
+			send(last+1, 1);
+			send(last+2, 1);
 			last[1]='\00';
 			last[2]='\00';
 			continue;
 		}
+
+		if (last[0] != '.' && last[1] != ' '){
+			last[2]=tolower(last[2]);
+		}
+
 
 		send(last + 1, 1);
     	int i = 0;
@@ -123,13 +143,11 @@ void InitUART (){
 	DCOCTL = DCO0;
     U0CTL = CHAR;
     U0TCTL = SSEL1 | SSEL0 | TXEPT;
-    U0RCTL = URXEIE;
     U0BR1 = 0;
     U0BR0 = 0x09;
     U0MCTL = 0x08;
 
-    ME1 = UTXE0 | URXE0;
-    //IE1 = UTXIE0 | URXIE0;
+    ME1 = URXE0;
     IFG1 &= ~UTXIFG0;
 }
 
@@ -144,27 +162,29 @@ void InitDMA (){
     DMACTL0 |= DMA0TSEL_3;
     DMA0CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE; // Single repeated, albo DMADT_0 Single
 
-
     // Kanal 1 DMA - nadajnik
-    DMA1SA = (unsigned int) txBuf->buffer;
+    DMA1SA = txBuf->buffer;
     DMA1DA = &U0TXBUF;
     DMA1SZ = 0x01;
     DMACTL0 |= DMA1TSEL_0;
-    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN| DMAIE; // Single repeated DMADT_4 , albo Single DMADT_0
+    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN | DMAIE; // Single repeated DMADT_4 , albo Single DMADT_0
 
 }
 // Funkcja wpisuje dane do bufora nadajnika, a takze inicjalizuje transmisje jesli nie jest zainicjalizowana
 void send(char *data, size_t length) {
-
-	circularBufferWrite1(txBuf, data, length);
-	if (U0TCTL & TXEPT) {
+	if (DMA1CTL & DMAEN){
+		DMA1CTL &= ~DMAEN;
+		circularBufferWrite1(txBuf, data, length);
 		DMA1CTL |= DMAEN;
-		DMA1CTL |= DMAREQ;
-		U0TCTL |= UTXE0;
+	} else {
+		circularBufferWrite1(txBuf, data, length);
 	}
 
-
-  if (freeSpace1(txBuf) == BUFFER_MARGIN) {
+	if (((DMACTL0 & 240) == 0) && (U0TCTL & TXEPT)) {
+		DMA1CTL |= DMAEN;
+		DMA1CTL |= DMAREQ;
+	}
+	if (freeSpace1(txBuf) == BUFFER_MARGIN) {
 		P1OUT |= CTS;
 	}
 }
@@ -172,48 +192,33 @@ void send(char *data, size_t length) {
 #pragma vector=DACDMA_VECTOR
 __interrupt void DMA (void){
 	if(DMA0CTL & DMAIFG){  // Przerwania odbiornika
+		DMA0DA = rxBuf->buffer + ((++rxBuf->writePointer) % BUFFER_SIZE);
 		if (freeSpace1(rxBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
-		rxBuf->writePointer++;
-		DMA0DA = rxBuf->buffer + rxBuf->writePointer;
-		DMA0CTL &= ~DMAIFG;
 		DMA0CTL |= DMAEN;
+		DMA0CTL &= ~DMAIFG;
 	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
+		ME1 |= UTXE0;
+		DMA1SA = txBuf->buffer + ((++txBuf->readPointer) % BUFFER_SIZE);
 		if (freeSpace1(txBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
-		txBuf->readPointer++;
-		DMA1SA = txBuf->buffer + rxBuf->readPointer;
 		if (txBuf->readPointer >= txBuf->size && txBuf->writePointer >= txBuf->size){
 			txBuf->readPointer = txBuf->readPointer % txBuf->size;
 			txBuf->writePointer = txBuf->writePointer % txBuf->size;
 		}
-		DMACTL0 |= DMA1TSEL_4;
-		DMA1CTL &= ~DMAREQ;
 
 		if(freeSpace1(txBuf) == BUFFER_SIZE){
+			DMACTL0 &= ~240;
 			DMACTL0 |= DMA1TSEL_0;
 		} else {
-			DMA1CTL |= DMAEN;
+			DMACTL0 &= ~240;
+			DMACTL0 |= DMA1TSEL_4;
 		}
+		DMA1CTL |= DMAEN;
+		DMA1CTL &= ~DMAREQ;
 		DMA1CTL &= ~DMAIFG;
+		ME1 &= ~UTXE0;
 	}
 }
-
-//#pragma vector=USART0RX_VECTOR
-//__interrupt void USART0_RX (void) {  // Przerwania odbiornika
-//	char received = RXBUF0;
-//	circularBufferWrite1(rxBuf, &received, 1);
-//	if (freeSpace1(rxBuf) == BUFFER_MARGIN) {
-//		P1OUT |= CTS;
-//	}
-//}
-//
-//#pragma vector=USART0TX_VECTOR
-//__interrupt void USART0_TX (void) {  // Przerwania nadajnika
-//	U0TCTL &= ~UTXE0;
-//	if (circularBufferRead1(txBuf, (char *) &TXBUF0, 1)) {
-//		U0TCTL |= UTXE0;
-//	}
-//}
