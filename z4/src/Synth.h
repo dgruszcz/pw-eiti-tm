@@ -12,7 +12,8 @@ typedef struct Synth {
   uint8_t paused;
 } Synth;
 
-Synth *synthInit(uint16_t *pitches, uint16_t *durations, uint16_t length);
+Synth *synthInit(uint16_t *pitches, uint16_t *durations,
+                 uint16_t length);
 
 // Generowanie interwalu dla kanalu obslugujacego wysokosc dzwieku
 uint16_t synthUpdatePitch(Synth *synth);

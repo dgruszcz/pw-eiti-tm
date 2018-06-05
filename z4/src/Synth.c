@@ -1,6 +1,7 @@
 #include "Synth.h"
 
-Synth *synthInit(uint16_t *pitches, uint16_t *durations, uint16_t length) {
+Synth *synthInit(uint16_t *pitches, uint16_t *durations,
+                 uint16_t length) {
   Synth *synth = malloc(sizeof(Synth));
   synth->pitches = pitches;
   synth->durations = durations;
@@ -17,7 +18,7 @@ uint16_t synthUpdatePitch(Synth *synth) {
 
 uint16_t synthUpdateDuration(Synth *synth) {
   if (synth->paused || synth->index >= synth->length) {
-	synth->paused = 1;
+    synth->paused = 1;
     return 0;
   }
 

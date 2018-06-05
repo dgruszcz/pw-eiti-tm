@@ -6,7 +6,7 @@
 
 // Licznik sekund
 typedef struct CtdnTimer {
-	uint16_t seconds;
+  uint16_t seconds;
 } CtdnTimer;
 
 CtdnTimer *ctdnTimerInit();
@@ -15,6 +15,7 @@ CtdnTimer *ctdnTimerInit();
 uint8_t ctdnTimerDecrement(CtdnTimer *ctdnTimer);
 
 // Metoda obslugujaca ustawianie licznika
-void ctdnTimerSetSeconds(CtdnTimer *ctdnTimer, int16_t seconds);
+void
+ctdnTimerSetSeconds(CtdnTimer *ctdnTimer, int16_t seconds);
 
 #endif /* CTDN_TIMER_H_ */

@@ -5,9 +5,10 @@
 #include <stdlib.h>
 
 typedef struct Lcd {
-	volatile unsigned char *segDir, *segOut, *digitDir, *digitOut;
-	int nextDigit;
-	char digits[8];
+  volatile unsigned char *segDir, *segOut
+  volatile unsigned char *digitDir, *digitOut;
+  int nextDigit;
+  char digits[8];
 } Lcd;
 
 // Metoda inicjujaca wyswietlacz
@@ -15,7 +16,10 @@ typedef struct Lcd {
 // segOut 	-- Rejestr wyjsciowy portu obslugujacego wyswietlanie segmentow
 // digitDir	-- Rejestr kierunku portu obslugujacego wybor znaku
 // digitOut	-- Rejestr wyjsciowy portu obslugujacego wybor znaku
-Lcd *lcdInit(volatile unsigned char *segDir, volatile unsigned char *segOut, volatile unsigned char *digitDir, volatile unsigned char *digitOut);
+Lcd *lcdInit(volatile unsigned char *segDir,
+             volatile unsigned char *segOut,
+             volatile unsigned char *digitDir,
+             volatile unsigned char *digitOut);
 
 // Metoda obslugujaca okresowe odswiezanie kolejnych znakow
 void lcdUpdateDigit(Lcd *lcd, char isCounting);
