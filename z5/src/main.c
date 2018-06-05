@@ -142,7 +142,7 @@ void InitDMA (){
     DMA0DA = rxBuf->buffer;
     DMA0SZ = 0x01;
     DMACTL0 |= DMA0TSEL_3;
-    DMA0CTL |= DMADT_4 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE; // Single repeated, albo DMADT_0 Single
+    DMA0CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE; // Single repeated, albo DMADT_0 Single
 
 
     // Kanal 1 DMA - nadajnik
@@ -150,7 +150,7 @@ void InitDMA (){
     DMA1DA = &U0TXBUF;
     DMA1SZ = 0x01;
     DMACTL0 |= DMA1TSEL_0;
-    DMA1CTL |= DMADT_4 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN| DMAIE; // Single repeated DMADT_4 , albo Single DMADT_0
+    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN| DMAIE; // Single repeated DMADT_4 , albo Single DMADT_0
 
 }
 // Funkcja wpisuje dane do bufora nadajnika, a takze inicjalizuje transmisje jesli nie jest zainicjalizowana
@@ -158,6 +158,7 @@ void send(char *data, size_t length) {
 
 	circularBufferWrite1(txBuf, data, length);
 	if (U0TCTL & TXEPT) {
+		DMA1CTL |= DMAEN;
 		DMA1CTL |= DMAREQ;
 		U0TCTL |= UTXE0;
 	}
@@ -177,6 +178,7 @@ __interrupt void DMA (void){
 		rxBuf->writePointer++;
 		DMA0DA = rxBuf->buffer + rxBuf->writePointer;
 		DMA0CTL &= ~DMAIFG;
+		DMA0CTL |= DMAEN;
 	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
 		if (freeSpace1(txBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
@@ -192,6 +194,8 @@ __interrupt void DMA (void){
 
 		if(freeSpace1(txBuf) == BUFFER_SIZE){
 			DMACTL0 |= DMA1TSEL_0;
+		} else {
+			DMA1CTL |= DMAEN;
 		}
 		DMA1CTL &= ~DMAIFG;
 	}
