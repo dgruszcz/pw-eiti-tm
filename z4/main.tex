@@ -40,6 +40,7 @@
 	stringstyle=\color{orange},
 }
 
+
 \title{TM -- Laboratorium 4. \\ \large Minutnik dynamiczny}
 \author{Krystian Chachuła \\ Dawid Gruszczyński \\ Marcin Skrzypkowski}
 
@@ -70,7 +71,7 @@ Ostateczny układ składał się z następujących elementów:
 
 \section{Implementacja}
 
-Rozpoczęliśmy projektowanie od podziału zadania na mniejsze bloki, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc pliki służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Cały algorytm jednak został zaimplementowany w pliku main.
+Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczęliśmy od podziału zadania na mniejsze części, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc struktury (klasy) służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Następnie zaplanowaliśmy ich podstawowe cechy w postaci pól oraz funkcjonalności w postaci funkcji bazujących na nich. Ogólną ideę rozwiązania przedstawia poniższy graf: % TODO tutaj chyba graf
 
 
 \section{Wyświetlanie}
@@ -90,7 +91,7 @@ Każdy znak ma być wyświetlany z częstotliwością co najmniej $60$ Hz, dlate
 
 \section{Przyciski}
 
-W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port a następnie skonfigurowane do dowolnej linii, która jest w danym momencie wygodna. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
+W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
 
 
 \section{Timery}
@@ -105,7 +106,6 @@ W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kana�
 	\item  \textbf{TBCCTR4} wysokość dźwięku
 \end{itemize}
 
-W systemie wykorzystujemy wszystko co popadnie (reaktor atomowy z regulatorem DMC już niebawem)
 
 
 
@@ -121,6 +121,7 @@ W systemie wykorzystujemy wszystko co popadnie (reaktor atomowy z regulatorem DM
 
 
 
+
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
@@ -129,27 +130,7 @@ W systemie wykorzystujemy wszystko co popadnie (reaktor atomowy z regulatorem DM
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
                                   PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
+
 
 
 
@@ -179,7 +160,7 @@ Sygnalizacja trybu pracy odbywa się poprzez wyświetlanie na jednym z wyświetl
 
 Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowania minutnika. Pozwala on także na wyłączenie alarmu sygnalizującego zakończenie zliczania.
 
-Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
+Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje o czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
 
 Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
 
