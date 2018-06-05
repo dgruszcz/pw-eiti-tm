@@ -33,7 +33,15 @@
 	xleftmargin=\parindent,
 	language=C,
 	showstringspaces=false,
+<<<<<<< HEAD
 	basicstyle=\footnotesize\ttfamily,
+=======
+<<<<<<< HEAD
+	basicstyle=\footnotesize\ttfamily,
+=======
+	basicstyle=\footnotesize\ttfamily
+>>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
+>>>>>>> e44228aef91c73fbec4c53b20e07c35c36e86bc0
 	keywordstyle=\bfseries\color{green!40!black},
 	commentstyle=\itshape\color{purple!40!black},
 	identifierstyle=\color{blue},
@@ -73,6 +81,28 @@ Ostateczny układ składał się z następujących elementów:
 
 Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczęliśmy od podziału zadania na mniejsze części, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc struktury (klasy) służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Następnie zaplanowaliśmy ich podstawowe cechy w postaci pól oraz funkcjonalności w postaci funkcji bazujących na nich. Ogólną ideę rozwiązania przedstawia poniższy graf: % TODO tutaj chyba graf
 
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=\textwidth]{assets/g_lcd.png}
+		\caption{Lcd}
+	\end{subfigure}\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=\textwidth]{assets/g_ctdntimer.png}
+		\caption{CtdnTimer}
+	\end{subfigure}
+	\par\bigskip
+	\centering
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=\textwidth]{assets/g_buttons.png}
+		\caption{Buttons}
+	\end{subfigure}\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=\textwidth]{assets/g_synth.png}
+		\caption{Synth}
+	\end{subfigure}
+	\caption{Klasy, ich metody oraz pola}
+\end{figure}
 
 \section{Wyświetlanie}
 
@@ -162,7 +192,19 @@ Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowani
 
 Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje o czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
 
+<<<<<<< HEAD
+Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
+
 Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{assets/synthdata.png}
+	\caption{Przykład transkrypcji przetłumaczonej na potrzeby syntezatora}
+\end{figure}
+=======
+Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
+>>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
 
 \pagebreak
 

@@ -1,5 +1,7 @@
 digraph {
-    graph [pad="0.4", nodesep="1.25", bgcolor="#fdf6e3"]
+    ratio="fill";
+    size="4,3!";
+    graph [pad="0.1", nodesep="1", bgcolor="#fdf6e3"]
     node [color="#002b36", fontcolor="#073642"]
     edge [fontsize="10"]
     
