@@ -196,8 +196,8 @@ __interrupt void DMA (void){
 		if (freeSpace1(rxBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
-		DMA0CTL |= DMAEN;
 		DMA0CTL &= ~DMAIFG;
+		DMA0CTL |= DMAEN;
 	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
 		ME1 |= UTXE0;
 		DMA1SA = txBuf->buffer + ((++txBuf->readPointer) % BUFFER_SIZE);
@@ -216,9 +216,9 @@ __interrupt void DMA (void){
 			DMACTL0 &= ~240;
 			DMACTL0 |= DMA1TSEL_4;
 		}
-		DMA1CTL |= DMAEN;
 		DMA1CTL &= ~DMAREQ;
 		DMA1CTL &= ~DMAIFG;
 		ME1 &= ~UTXE0;
+		DMA1CTL |= DMAEN;
 	}
 }
