@@ -1,0 +1,26 @@
+digraph {
+    graph [pad="0.4", nodesep="1.25", bgcolor="#fdf6e3"]
+    node [color="#002b36", fontcolor="#073642"]
+    edge [fontsize="10"]
+    
+    {
+        rank="source";
+        Synth [label=<Synth<BR /><FONT POINT-SIZE="10">Syntezator dźwięku<BR /><BR />Pola:<BR />pitches[] (kol. wys. dźw.)<BR />durations[] (kol. dł. dźw.)<BR />length (dł. pow. tablic)<BR />index (indeks akt. granej nuty)<BR />paused (synt. wył.)</FONT>> color="#2aa198"]
+    }
+    
+    {
+        synthInit [color="#b58900"]
+        synthUpdatePitch [label=<synthUpdatePitch<BR /><FONT POINT-SIZE="10">Podaj następny interwał timera<BR />w celu aktualizacji wysokości dźwięku</FONT>>, color="#cb4b16"]
+        synthUpdateDuration [label=<synthUpdateDuration<BR /><FONT POINT-SIZE="10">Podaj następny interwał timera<BR />w celu aktualizacji długość trwania dźwięku</FONT>>, color="#dc322f"]
+        synthStop [color="#d33682"]
+        synthStart [color="#dc322f"]
+    }
+    
+    synthInit -> Synth [color="#b58900"]
+    synthUpdatePitch -> Synth [color="#cb4b16"]
+    synthUpdateDuration -> Synth [color="#dc322f"]
+    synthStop -> Synth [color="#d33682"]
+    synthStart -> Synth [color="#dc322f"]
+    
+}
+ 
