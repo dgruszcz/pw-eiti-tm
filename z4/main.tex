@@ -33,11 +33,7 @@
 	xleftmargin=\parindent,
 	language=C,
 	showstringspaces=false,
-<<<<<<< HEAD
 	basicstyle=\footnotesize\ttfamily,
-=======
-	basicstyle=\footnotesize\ttfamily
->>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
 	keywordstyle=\bfseries\color{green!40!black},
 	commentstyle=\itshape\color{purple!40!black},
 	identifierstyle=\color{blue},
@@ -72,6 +68,8 @@ Ostateczny układ składał się z następujących elementów:
 	\item \textbf{007\_TBD} (moduł głośnika ze wzmacniaczem)
 \end{itemize}
 
+\pagebreak
+
 \section{Implementacja}
 
 Rozpoczęliśmy projektowanie od podziału zadania na mniejsze bloki, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc pliki służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Cały algorytm jednak został zaimplementowany w pliku main.
@@ -99,6 +97,8 @@ Rozpoczęliśmy projektowanie od podziału zadania na mniejsze bloki, aby uzyska
 	\caption{Klasy, ich metody oraz pola}
 \end{figure}
 
+\pagebreak
+
 \section{Wyświetlanie}
 
 Ponieważ wyświetlacz dynamiczny, z którego korzystaliśmy w tym ćwiczeniu, ma możliwość wyświetlania tylko jendego symbolu na raz, musieliśmy przełączać się między kolejnymi znakami. W tym celu najpierw musieliśmy mieć możliwość manipulacji częstotliwością. Do odliczania jednej sekundy, która była również potrzebna do wykonania zadania minutnika (założyliśmy dokładność jednej sekundy), wykorzystaliśmy zegar ACLK ustawiony na częstotliwość $32.768$ kHz. Korzystając z tego, że timery w MSP430 są 16-bitowe, mogliśmy wykorzystać jeden kanał timera A do odliczania pełnych sekund. W celu sprawdzenia, czy wybrany przez nas sposób mierzenia czasu jest dopuszczalny, sprawdziliśmy częstotliwość generowania przerwań kanału na oscyloskopie. Poniżej znajdują się wyniki testów.
@@ -113,6 +113,8 @@ Po 20 próbkach odchylenie standardowe od jednej sekundy wynosiło $232.85$ $\mu
 Ostateczna postać minutnika posiada pięć symboli, 2 cyfry odpowiedzialne za wyświetlanie minut (więc maksymalną wartością do ustawienia było $99:59$) oraz jeden symbol oznaczający tryb, w którym aktualnie znajduje się minutnik. W zależności od tego, w którym trybie znajduje się system, na ostatnim miejscu wyświtelana jest litera \textbf{t} (zliczanie) lub \textbf {c} (zliczanie wyłączone).
 
 Każdy znak ma być wyświetlany z częstotliwością co najmniej $60$ Hz, dlatego przełączanie pojedynczego symbolu następuje z częstotliwością $32768 / 60 / 5$ Hz. Program został napisany w taki sposób, aby można było wygodnie zmieniać częstotliwość odświeżania pojedynczego symbolu.
+
+\pagebreak
 
 \section{Przyciski}
 
@@ -130,71 +132,7 @@ W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kana�
 	\item  \textbf{TBCCTR3}
 \end{itemize}
 
-W systemie wykorzystujemy wszystko co popadnie (reaktor atomowy z regulatorem DMC już niebawem)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% DAWID WORKSPACE
-
+\pagebreak
 
 \section{Usprawnienia oraz niezbędne modyfikacje projektu}
 
@@ -204,21 +142,15 @@ Sygnalizacja trybu pracy odbywa się poprzez wyświetlanie na jednym z wyświetl
 
 Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowania minutnika. Pozwala on także na wyłączenie alarmu sygnalizującego zakończenie zliczania.
 
-Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
+Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
 
-<<<<<<< HEAD
-Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
-
-Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
+Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As $\rightarrow$ Gis $\rightarrow$ Gs (do programu należy wpisać Gs); Eis $\rightarrow$ F; Des $\rightarrow$ Cis $\rightarrow$ Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{assets/synthdata.png}
 	\caption{Przykład transkrypcji przetłumaczonej na potrzeby syntezatora}
 \end{figure}
-=======
-Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
->>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
 
 \pagebreak
 
@@ -231,7 +163,6 @@ Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwe
 \noindent\begin{minipage}[t]{.45\textwidth}
 	\lstinputlisting[firstline=65, lastline=119, style=customc]{src/main.c}
 \end{minipage}\hfill
-\pagebreak
 
 \noindent\begin{minipage}[t]{.45\textwidth}
 	\lstinputlisting[firstline=121, lastline=180, style=customc]{src/main.c}
