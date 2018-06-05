@@ -40,6 +40,7 @@
 	stringstyle=\color{orange},
 }
 
+
 \title{TM -- Laboratorium 4. \\ \large Minutnik dynamiczny}
 \author{Krystian Chachuła \\ Dawid Gruszczyński \\ Marcin Skrzypkowski}
 
@@ -72,7 +73,7 @@ Ostateczny układ składał się z następujących elementów:
 
 \section{Implementacja}
 
-Rozpoczęliśmy projektowanie od podziału zadania na mniejsze bloki, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc pliki służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Cały algorytm jednak został zaimplementowany w pliku main.
+Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczęliśmy od podziału zadania na mniejsze części, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc struktury (klasy) służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Następnie zaplanowaliśmy ich podstawowe cechy w postaci pól oraz funkcjonalności w postaci funkcji bazujących na nich. Ogólną ideę rozwiązania przedstawia poniższy graf: % TODO tutaj chyba graf
 
 \begin{figure}[H]
 	\centering
@@ -118,7 +119,7 @@ Każdy znak ma być wyświetlany z częstotliwością co najmniej $60$ Hz, dlate
 
 \section{Przyciski}
 
-W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port a następnie skonfigurowane do dowolnej linii, która jest w danym momencie wygodna. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
+W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
 
 
 \section{Timery}
@@ -129,7 +130,8 @@ W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kana�
 	\item  \textbf{TBCCTR0} częstotliwość odświeżania pojedynczego symbolu
 	\item  \textbf{TBCCTR1} okres sprawdzania przycisków
 	\item  \textbf{TBCCTR2} przyspieszanie zmiany wartości minutnika
-	\item  \textbf{TBCCTR3}
+	\item  \textbf{TBCCTR3} długość trwania dźwięku
+	\item  \textbf{TBCCTR4} wysokość dźwięku
 \end{itemize}
 
 \pagebreak
