@@ -33,15 +33,7 @@
 	xleftmargin=\parindent,
 	language=C,
 	showstringspaces=false,
-<<<<<<< HEAD
 	basicstyle=\footnotesize\ttfamily,
-=======
-<<<<<<< HEAD
-	basicstyle=\footnotesize\ttfamily,
-=======
-	basicstyle=\footnotesize\ttfamily
->>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
->>>>>>> e44228aef91c73fbec4c53b20e07c35c36e86bc0
 	keywordstyle=\bfseries\color{green!40!black},
 	commentstyle=\itshape\color{purple!40!black},
 	identifierstyle=\color{blue},
@@ -79,7 +71,7 @@ Ostateczny układ składał się z następujących elementów:
 
 \section{Implementacja}
 
-Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczęliśmy od podziału zadania na mniejsze części, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc struktury (klasy) służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Następnie zaplanowaliśmy ich podstawowe cechy w postaci pól oraz funkcjonalności w postaci funkcji bazujących na nich. Ogólną ideę rozwiązania przedstawia poniższy graf: % TODO tutaj chyba graf
+Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczęliśmy od podziału zadania na mniejsze części, aby uzyskać większy komfort pracy i ułatwić orientację. Stowrzyliśmy więc struktury (klasy) służące do obsługi przycisków, wyświetlania symboli, podstawowych funkcji minutnika oraz odtwarzania melodii. Następnie zaplanowaliśmy ich podstawowe cechy w postaci pól oraz funkcjonalności w postaci metod bazujących na nich. Ogólną ideę rozwiązania przedstawia poniższy graf: % TODO tutaj chyba graf
 
 \begin{figure}[H]
 	\centering
@@ -106,27 +98,27 @@ Do rozwiązania zadania podeszliśmy w sposób obiektowy. Projektowanie ropoczę
 
 \section{Wyświetlanie}
 
-Ponieważ wyświetlacz dynamiczny, z którego korzystaliśmy w tym ćwiczeniu, ma możliwość wyświetlania tylko jendego symbolu na raz, musieliśmy przełączać się między kolejnymi znakami. W tym celu najpierw musieliśmy mieć możliwość manipulacji częstotliwością. Do odliczania jednej sekundy, która była również potrzebna do wykonania zadania minutnika (założyliśmy dokładność jednej sekundy), wykorzystaliśmy zegar ACLK ustawiony na częstotliwość $32.768$ kHz. Korzystając z tego, że timery w MSP430 są 16-bitowe, mogliśmy wykorzystać jeden kanał timera A do odliczania pełnych sekund. W celu sprawdzenia, czy wybrany przez nas sposób mierzenia czasu jest dopuszczalny, sprawdziliśmy częstotliwość generowania przerwań kanału na oscyloskopie. Poniżej znajdują się wyniki testów.
+Wyświetlacz dynamiczny, z którego korzystaliśmy w tym ćwiczeniu, ma możliwość wyświetlania tylko jednego symbolu na raz, przez co, w celu poprawnego wyświetlania zawartości minutnika, należy przełączać się pomiędzy kolejnymi znakami. Aby tego dokonać najpierw musieliśmy mieć możliwość manipulacji częstotliwością. Do odliczania jednej sekundy, która była potrzebna do wykonania zadania minutnika (założyliśmy dokładność jednej sekundy), wykorzystaliśmy zegar ACLK ustawiony na częstotliwość $32.768$ kHz. Natomiast do wywoływania cyklicznych przerwań wykorzystaliśmy główny kanał Timera A, a sam Timer skonfigurowaliśmy do trybu zliczania do wartości zawartej w rejestrze kanału. W celu sprawdzenia, czy wybrany przez nas sposób mierzenia czasu jest dopuszczalny, sprawdziliśmy częstotliwość generowania przerwań kanału na oscyloskopie. Poniżej znajdują się wyniki testów.
 
 \begin{figure}[H]
 	\includegraphics[width=\textwidth]{scope_1.png}
 	\caption{Test odliczania jednej sekundy na wybranej przez nas częstotliwości $32.768 kHz$}
 \end{figure}
 
-Po 20 próbkach odchylenie standardowe od jednej sekundy wynosiło $232.85$ $\mu$s, stwierdziliśmy że jest to wystarczająca dokładność do zrealizowania naszego zadania.
+Po 20 próbkach odchylenie standardowe od jednej sekundy wynosiło $232.85$ $\mu$s, stwierdziliśmy, że jest to wystarczająca dokładność do zrealizowania naszego zadania.
 
-Ostateczna postać minutnika posiada pięć symboli, 2 cyfry odpowiedzialne za wyświetlanie minut (więc maksymalną wartością do ustawienia było $99:59$) oraz jeden symbol oznaczający tryb, w którym aktualnie znajduje się minutnik. W zależności od tego, w którym trybie znajduje się system, na ostatnim miejscu wyświtelana jest litera \textbf{t} (zliczanie) lub \textbf {c} (zliczanie wyłączone).
+Ostateczna postać minutnika posiada pięć symboli, 2 cyfry odpowiedzialne za wyświetlanie minut, 2 cyfry odpowiedzialne za wyświetlanie sekund (maksymalną wartością możliwą do ustawienia $99:59$) oraz jeden symbol oznaczający tryb, w którym aktualnie znajduje się minutnik. W zależności od tego, w którym trybie znajduje się system, na ostatnim miejscu wyświetlana jest litera \textbf{t} (zliczanie) lub \textbf {c} (zliczanie wyłączone).
 
 Każdy znak ma być wyświetlany z częstotliwością co najmniej $60$ Hz, dlatego przełączanie pojedynczego symbolu następuje z częstotliwością $32768 / 60 / 5$ Hz. Program został napisany w taki sposób, aby można było wygodnie zmieniać częstotliwość odświeżania pojedynczego symbolu.
 
 \section{Przyciski}
 
-W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
+W końcowej wersji projektu zaimplementowaliśmy trzy przyciski, jeden do zwiększania wartości, od której minutnik zaczynał odliczanie, drugi do zmniejszania tej wartości, oraz dodany jako uzupełnienie funkcjonalności trzeci przycisk do resetu. Mogą być one wpięte w dowolny port. Dodatkowo, aby zwiększyć komfort korzystania z systemu, wprowadziliśmy zwiększanie prędkości zmiany wartości minutnika proporcjonalnie z czasem trzymania przycisku. W razie przytrzymania dwóch przycisków jednocześnie, minutnik się zatrzymuje i czeka na puszczenie któregoś z nich. Również wciśnięcie dowolnego z nich powoduje zakończenie sygnalizowania, że minutnik doliczył do zera.
 
-
+\pagebreak
 \section{Timery}
 
-W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kanałów z timera B do obsługi sygnału zliczenia do zera oraz obsługi wyświetlacza. Działanie timera A jest ustawione w tryp \textbf{UP} w celu umożliwienia zliczania wciąż do wartości $32768$, a więc pełnej sekundy. Timer B ustawiony został w tryb \textbf{continuous}, aby móc ustawić odpowiednie interwały potrzebne do obsługi debouncingu przycisków, odświeżania wyświtlacza oraz generowania sygnału zakończenia mierzenia czasu. Kanały odpowiadają kolejno za:
+W systemie wykorzystujemy timer A do zliczania pełnych sekund i pięć kanałów z timera B do obsługi sygnału zliczenia do zera oraz obsługi wyświetlacza. Działanie timera A jest ustawione w tryp \textbf{UP} w celu umożliwienia zliczania wciąż do wartości $32768$, a więc pełnej sekundy. Timer B ustawiony został w tryb \textbf{continuous}, aby móc ustawić odpowiednie interwały potrzebne do obsługi debouncingu przycisków, odświeżania wyświetlacza oraz generowania sygnału zakończenia mierzenia czasu. Kanały odpowiadają kolejno za:
 \begin{itemize}
 	\item  \textbf{TACCTR0} zliczanie pojedynczych sekund
 	\item  \textbf{TBCCTR0} częstotliwość odświeżania pojedynczego symbolu
@@ -135,51 +127,11 @@ W systemie wykorzystujemy timer A do zliczania pełnych sekund oraz pięć kana�
 	\item  \textbf{TBCCTR3} długość trwania dźwięku
 	\item  \textbf{TBCCTR4} wysokość dźwięku
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-                                  PRZERWA TECHNICZNA  ------------  PRZEPRASZAMY ZA UTRUDNIENIA
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 % DAWID WORKSPACE
+
+\section{Debouncing}
+Wprowadzenie timerów pozwoliło nam na prostszą niż w poprzednim zadaniu implementację obsłgi przycisków. Debouncing odbywa się teraz przy pomocy kanału timera B, Za każdym razem gdy zostanie odliczony pewien interwał (długości BUTTON\_PERIOD), kanał TBCCR1 zgłasza przerwanie, w którym następuje sprawdzenie, czy któryś z przycisków jest wciśnięty. Jeśli tak, zostaje zinkrementowana wartośc licznika debouncingu. Dopiero gdy zostanie sprawdzonych odpowiednia ilość takich okresów pod rząd z wciśniętym przyciskiem, następuje jego obsługa.
+
 
 
 \section{Usprawnienia oraz niezbędne modyfikacje projektu}
@@ -192,7 +144,6 @@ Przycisk zerujący dodaliśmy w celu umożliwienia łatwego i szybkiego zerowani
 
 Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje o czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
 
-<<<<<<< HEAD
 Największym usprawnieniem minutnika jest odgrywanie melodii sygnalizującej zakończenie odliczania. Odbywa się to poprzez generację na wyjściu jednego z kanałów Timera B sygnału kwadratowego, a następnie podanie go na wejście wzmacniacza, który z kolei zasila głośnik wzmocnionym sygnałem. Do sterowania odgrywaniem melodii służy klasa Synth, która przechowuje informacje czasie trwania i częstotliwości kolejnych nut, natomiast za generację sygnału PWM odpowiadają dwa kanały Timera B. Jeden z nich zajmuje się generowaniem sygnału kwadratowego, który podawany jest bezpośrednio na wzmacniacz. Drugi natomiast, jest odpowiedzialny za zmienianie aktualnie generowanej częstotliwości (wysokości dźwięku) po upłynięciu czasu trwania kolejnego dźwięku.
 
 Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
@@ -202,11 +153,8 @@ Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwe
 	\includegraphics[width=\textwidth]{assets/synthdata.png}
 	\caption{Przykład transkrypcji przetłumaczonej na potrzeby syntezatora}
 \end{figure}
-=======
-Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwersalnego monofonicznego syntezatora dźwięku. Umożliwia to zaprogramowanie dowolnej sekwencji nut. Tłumaczenie zapisu nutowego na zapis zrozumiały dla syntezatora jest intuicyjny. Przyjmuje on listę par (wysokość, czas trwania). Program obłsuguje mnemoniczne nazwy dźwięków skali chromatycznej takie jak C, D, E, F itd. Aby otrzymać dźwięki takie jak np. Cis lub Ges należy najpierw odnaleźć dźwięk równoważny danemu, ale z końcówką -is, a następnie usunąć z nazwy literę i. Np. As -> Gis -> Gs (do programu należy wpisać Gs); Eis -> F; Des -> Cis -> Cs. Można tego uniknąć poprzez wprowadzenie makr dla wszystkich dźwięków, ale przy tworzeniu tego projektu nie było takiej konieczności.
->>>>>>> e6aea991a1dda7ede6be08bf655ac4242c4ef292
 
-\pagebreak
+% \pagebreak
 
 \section{Program}
 \subsection{main.c}
@@ -261,7 +209,7 @@ Klasa Synth została napisana w ten sposób, aby stanowiła implementację uniwe
 \pagebreak
 
 \section{Możliwości udoskonalenia systemu}
-Możliwym udoskonaleniem minutnika byłoby przesyłanie poprzez port szeregowy (na przykład za pomocą UART)
+Możliwym udoskonaleniem minutnika byłoby przesyłanie melodii minutnika poprzez port szeregowy (na przykład za pomocą UART)
 
 \end{document}
 \grid
