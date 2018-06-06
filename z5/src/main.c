@@ -16,8 +16,6 @@ char rxBufBuf[BUFFER_SIZE];
 void InitUART ();
 void InitDMA ();
 
-
-
 CircularBuffer *rxBuf;
 CircularBuffer *txBuf;
 
@@ -40,8 +38,8 @@ int main(void) {
  	BCSCTL2 |= SELM_2;
  	int i;
  	do{
- 	IFG1 &= ~OFIFG;
- 	for(i = 0; i < 0xFF; ++i);
+ 		IFG1 &= ~OFIFG;
+ 		for(i = 0; i < 0xFF; ++i);
  	} while (IFG1 & OFIFG);
 
     rxBuf = circularBufferInit(BUFFER_SIZE, txBufBuf);
@@ -54,9 +52,18 @@ int main(void) {
     char last[] = "\00\00\00";
 
     while (1) {
+//    	if (freeSpace(rxBuf) == BUFFER_SIZE && freeSpace(txBuf) == BUFFER_SIZE) {
+//    		__bic_SR_register(GIE);
+//
+//    	    U0TCTL |= URXSE;
+//    		IE1 |= URXIE0;
+//    		__bis_SR_register(GIE+LPM4_bits);
+//    	}
+
+
     	DMA0CTL &= ~DMAEN;
-    	if (!circularBufferRead1(rxBuf, last+2, 1)) {
-    		if (freeSpace1(rxBuf) == rxBuf->size) {
+    	if (!circularBufferRead(rxBuf, last+2, 1)) {
+    		if (freeSpace(rxBuf) == rxBuf->size) {
     			P1OUT &= ~CTS;
     		}
     		DMA0CTL |= DMAEN;
@@ -115,8 +122,7 @@ int main(void) {
 
 		// Znak nowej linii
 		if (last[2] == '\012' || last[2] == '\015') {
-			send(last+1, 1);
-			send(last+2, 1);
+			send(last+1, 2);
 			last[1]='\00';
 			last[2]='\00';
 			continue;
@@ -140,7 +146,7 @@ void InitUART (){
     BCSCTL1 = RSEL2 | RSEL0;
 	DCOCTL = DCO0;
     U0CTL = CHAR;
-    U0TCTL = SSEL1 | SSEL0 | TXEPT;
+    U0TCTL = SSEL1 | SSEL0 | TXEPT | URXSE;
     U0BR1 = 0;
     U0BR0 = 0x09;
     U0MCTL = 0x08;
@@ -172,26 +178,32 @@ void InitDMA (){
 void send(char *data, size_t length) {
 	if (DMA1CTL & DMAEN){
 		DMA1CTL &= ~DMAEN;
-		circularBufferWrite1(txBuf, data, length);
+		circularBufferWrite(txBuf, data, length);
 		DMA1CTL |= DMAEN;
 	} else {
-		circularBufferWrite1(txBuf, data, length);
+		circularBufferWrite(txBuf, data, length);
 	}
 
 	if (((DMACTL0 & 240) == 0) && (U0TCTL & TXEPT)) {
 		DMA1CTL |= DMAEN;
 		DMA1CTL |= DMAREQ;
 	}
-	if (freeSpace1(txBuf) == BUFFER_MARGIN) {
+	if (freeSpace(txBuf) == BUFFER_MARGIN) {
 		P1OUT |= CTS;
 	}
 }
 
+#pragma vector=USART0RX_VECTOR
+__interrupt void USARTRX0(void) {
+	IE1 &= ~URXIE0;
+	LPM4_EXIT;
+}
+
 #pragma vector=DACDMA_VECTOR
-__interrupt void DMA (void){
+__interrupt void DMA (void) {
 	if(DMA0CTL & DMAIFG){  // Przerwania odbiornika
 		DMA0DA = rxBuf->buffer + ((++rxBuf->writePointer) % BUFFER_SIZE);
-		if (freeSpace1(rxBuf) == BUFFER_MARGIN) {
+		if (freeSpace(rxBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
 		DMA0CTL &= ~DMAIFG;
@@ -199,15 +211,15 @@ __interrupt void DMA (void){
 	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
 		ME1 |= UTXE0;
 		DMA1SA = txBuf->buffer + ((++txBuf->readPointer) % BUFFER_SIZE);
-		if (freeSpace1(txBuf) == BUFFER_MARGIN) {
+		if (freeSpace(txBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
 		if (txBuf->readPointer >= txBuf->size && txBuf->writePointer >= txBuf->size){
-			txBuf->readPointer = txBuf->readPointer % txBuf->size;
-			txBuf->writePointer = txBuf->writePointer % txBuf->size;
+			txBuf->readPointer = txBuf->readPointer - txBuf->size;
+			txBuf->writePointer = txBuf->writePointer - txBuf->size;
 		}
 
-		if(freeSpace1(txBuf) == BUFFER_SIZE){
+		if(freeSpace(txBuf) == BUFFER_SIZE){
 			DMACTL0 &= ~240;
 			DMACTL0 |= DMA1TSEL_0;
 		} else {
@@ -219,4 +231,5 @@ __interrupt void DMA (void){
 		ME1 &= ~UTXE0;
 		DMA1CTL |= DMAEN;
 	}
+//	LPM4_EXIT;
 }
