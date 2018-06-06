@@ -1,13 +1,13 @@
 digraph {
     ratio="fill";
     size="4,3!";
-    graph [pad="0.1", nodesep="1", bgcolor="#fdf6e3"]
+    graph [pad="0.1", nodesep="0.1", bgcolor="#fdf6e3"]
     node [color="#002b36", fontcolor="#073642"]
     edge [fontsize="10"]
     
     {
         rank="source";
-        Buttons [label=<Buttons<BR /><FONT POINT-SIZE="10">Przyciski<BR /><BR />Pola:<BR />states (akt. stan przyc.)<BR />statesPending (zdarz. wciś. do obsłuż.)<BR />held (przyc. trzymany przez tyle cykli)</FONT>> color="#6c71c4"]
+        Buttons [label=<Buttons<BR /><FONT POINT-SIZE="10">Przyciski<BR /><BR />Pola:<BR />states[] (akt. stan przyc.)<BR />statesPending[] (zdarz. wciś. do obsłuż.)<BR />held (przyc. trzymany przez tyle cykli)</FONT>> color="#6c71c4"]
     }
     
     {
