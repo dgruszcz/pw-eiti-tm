@@ -66,12 +66,14 @@ int main(void) {
 
     // Poczatek pliku lub nowa linia
 		if (last[1] == '\00') {
-			if (last[2] == '\015'){
-				last[1] = 10;
-				send(last+1, 1);
+			if (last[2] == '\012' || last[2] == '\015'){
 				send(last+2, 1);
 				last[1]='\00';
 				last[2]='\00';
+				continue;
+			}
+
+			if (last[2] == ' ') {
 				continue;
 			}
 
@@ -95,7 +97,6 @@ int main(void) {
 		// Spacja po kropce
 		if((last[1] == '.' || last[1] == ',' || last[1] == ':' || last[1] == ';' || last[1] == ')' || last[1] == '!' || last[1] == '?') && last[2] != ' '){
 			 send(last + 1, 1);
-		    	int i = 0;
 		    	last[0] = last[1];
 		    	last[1]= ' ';
 		}
@@ -103,7 +104,6 @@ int main(void) {
 		// Spacja przed otwarciem nawiasu
 		if (last[2] == '(' && last[1] != ' '){
 			send(last + 1, 1);
-			int i = 0;
 			last[0] = last[1];
 			last[1]= ' ';
 		}
@@ -114,9 +114,7 @@ int main(void) {
 		}
 
 		// Znak nowej linii
-		if (last[2] == '\015') {
-			send(last+1, 1);
-			last[1] = 10;
+		if (last[2] == '\012' || last[2] == '\015') {
 			send(last+1, 1);
 			send(last+2, 1);
 			last[1]='\00';
