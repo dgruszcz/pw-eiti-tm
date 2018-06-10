@@ -1,7 +1,7 @@
 digraph {
     ratio="fill";
     size="4,3!";
-    graph [pad="0.1", nodesep="1", bgcolor="#fdf6e3"]
+    graph [pad="0.1", nodesep="0.1", bgcolor="#fdf6e3"]
     node [color="#002b36", fontcolor="#073642"]
     edge [fontsize="10"]
     
