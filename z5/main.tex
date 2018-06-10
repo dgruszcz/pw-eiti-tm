@@ -67,12 +67,21 @@ Ostateczny układ składał się z następujących elementów:
 	\item \textbf{06x\_EIA232\_4} (moduł łącza szeregowego RS232)
 \end{itemize}
 
-\section{Implementacja}
-
 \section{Modyfikacje zadania}
-W zadaniu dodatkowo wykorzystane zostały dwa kanały sterownika DMA. Jeden do odczytu danych z odbiornika w przypadku ich otrzymania, drugi do wpisywania danych do nadajnika w momencie gdy w buforze znajdują się dane do wysłania oraz nadajnik jest gotowy do transmisji.
+W zadaniu dodatkowo zdecydowaliśmy się wykorzystać dwa kanały sterownika DMA. Jeden do odczytu danych z odbiornika w przypadku ich otrzymania, drugi do wpisywania danych do nadajnika w momencie gdy w buforze znajdują się dane do wysłania oraz nadajnik jest gotowy do transmisji.
 
 
+
+\section{Implementacja}
+Nadawane poprzez komputer znaki wysyłane są za pomocą portu szeregowego do odbiornika interfejsu UART mikrokontrolera MSP. Następnie przenoszone są za pomocą jednego z kanałów sterownika DMA do bufora przechowującego odebrane, nieprzetworzone dane.
+
+Za przetwarzanie znaków odpowiedzialna jest pętla główna programu. Wszystkie znaki przed przetworzeniem odczytywane są z bufora odbiornika w takiej samej kolejności w jakiej zostały do niego wpisane. Kowersja tekstu odbywa się poprzez sprawdzanie czy ciąg kilku kolejnych znaków zawiera błędy. Jeżeli tak, są one poprawiane przed dalszym ich przesłaniem. Po zakończeniu konwersji znaki są wpisywane do bufora nadajnika.
+
+Za przenoszenie znaków z bufora do rejestru nadajnika odpowiedzialny jest drugi wykorzystany przez nas kanał sterownika DMA. W momencie gdy do bufora trafiają pierwsze dane, w celu zainicjowania transmisji, ręcznie inicjowany jest pierwszy transfer. Następne transfery inicjowane są automatycznie poprzez flagę przerwań.
+
+Ze względu na strukturę buforów, obydwa kanały sterownika DMA pracują w trybie pojedyńczego transferu. Oznacza to, że po każdym transferze wymagane jest podjęcie obsługi przerwania w celu ponownej ich aktywacji. Jest to niezbędne ze względu na to, że bufory posiadają ograniczoną wielkość oraz ich wskaźniki zapisu oraz oczytu danych muszą być inkrementowane po każdej operacji. W celu jak najszybszego przygotowania systemu na odbiór kolejdych danych, inkrementacja oraz przestawianie wskaźników z końca bufora na początek realizowane są podczas obsługi przerwania po każdym transferze.
+
+Transmisja pomiędzy komputerem a mikrokontrolerem odbywa się z bardzo dużą prędkością. Ze względu na to, że średni czas przetwarzanie tekstu jest dłuższy niż wynosi czas pomiędzy kolejnymi odebranymi znakami, przy dużej ilości otrzymywanych danych następuje przepełnienie bufora odbiornika. Aby temu zapobiec, w momencie gdy bufor jest w połowie zapełniony, wysyłany jest synał żadania wstrzymania transmisji. Transmisja jest wznawiana dopiero po całkowitym opróżnieniu bufora.
 
 
 
