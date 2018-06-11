@@ -52,14 +52,12 @@ int main(void) {
     char last[] = "\00\00\00";
 
     while (1) {
-//    	if (freeSpace(rxBuf) == BUFFER_SIZE && freeSpace(txBuf) == BUFFER_SIZE) {
-//    		__bic_SR_register(GIE);
-//
-//    	    U0TCTL |= URXSE;
-//    		IE1 |= URXIE0;
-//    		__bis_SR_register(GIE+LPM4_bits);
-//    	}
-
+    	if (freeSpace(rxBuf) == BUFFER_SIZE && freeSpace(txBuf) == BUFFER_SIZE) {
+    		if (freeSpace(rxBuf) == rxBuf->size) {
+    			P1OUT &= ~CTS;
+    		}
+    		__bis_SR_register(LPM1_bits);
+    	}
 
     	DMA0CTL &= ~DMAEN;
     	if (!circularBufferRead(rxBuf, last+2, 1)) {
@@ -132,12 +130,9 @@ int main(void) {
 			last[2]=tolower(last[2]);
 		}
 
-
 		send(last + 1, 1);
-    	int i = 0;
-    	for (i; i < 3 - 1; i++) {
-    		last[i] = last[i + 1];
-    	}
+		last[0] = last[1];
+		last[1] = last[2];
     }
 }
 
@@ -146,13 +141,15 @@ void InitUART (){
     BCSCTL1 = RSEL2 | RSEL0;
 	DCOCTL = DCO0;
     U0CTL = CHAR;
-    U0TCTL = SSEL1 | SSEL0 | TXEPT | URXSE;
+//    U0TCTL = SSEL1 | SSEL0 | TXEPT | URXSE;
+    U0TCTL = SSEL1 | SSEL0 | TXEPT;
     U0BR1 = 0;
     U0BR0 = 0x09;
     U0MCTL = 0x08;
 
     ME1 = URXE0;
     IFG1 &= ~UTXIFG0;
+//    IE1 |= URXIE0;
 }
 
 void InitDMA (){
@@ -193,11 +190,6 @@ void send(char *data, size_t length) {
 	}
 }
 
-#pragma vector=USART0RX_VECTOR
-__interrupt void USARTRX0(void) {
-	IE1 &= ~URXIE0;
-	LPM4_EXIT;
-}
 
 #pragma vector=DACDMA_VECTOR
 __interrupt void DMA (void) {
@@ -231,5 +223,5 @@ __interrupt void DMA (void) {
 		ME1 &= ~UTXE0;
 		DMA1CTL |= DMAEN;
 	}
-//	LPM4_EXIT;
+	LPM1_EXIT;
 }
