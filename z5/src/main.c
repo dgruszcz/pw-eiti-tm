@@ -25,15 +25,13 @@ int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
     // Konfiguracja pinow
-    P5DIR |= BIT4;
-    P5SEL |= BIT4;
     P1DIR |= CTS;
     P3DIR |= TxD;
     P3SEL |= RxD | TxD;
 
     InitUART();
 
-    // Przelaczane MCLK na rezonator kwarcowy
+    // Przelaczane MCLK na XT2CLK
  	BCSCTL1 |= XTS;
  	BCSCTL2 |= SELM_2;
  	int i;
@@ -126,6 +124,7 @@ int main(void) {
 			continue;
 		}
 
+		// Maly znak w srodku zdania
 		if (last[0] != '.' && last[1] != ' '){
 			last[2]=tolower(last[2]);
 		}
@@ -141,7 +140,6 @@ void InitUART (){
     BCSCTL1 = RSEL2 | RSEL0;
 	DCOCTL = DCO0;
     U0CTL = CHAR;
-//    U0TCTL = SSEL1 | SSEL0 | TXEPT | URXSE;
     U0TCTL = SSEL1 | SSEL0 | TXEPT;
     U0BR1 = 0;
     U0BR0 = 0x09;
@@ -149,7 +147,6 @@ void InitUART (){
 
     ME1 = URXE0;
     IFG1 &= ~UTXIFG0;
-//    IE1 |= URXIE0;
 }
 
 void InitDMA (){
@@ -161,25 +158,22 @@ void InitDMA (){
     DMA0DA = rxBuf->buffer;
     DMA0SZ = 0x01;
     DMACTL0 |= DMA0TSEL_3;
-    DMA0CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE; // Single repeated, albo DMADT_0 Single
+    DMA0CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE;
 
     // Kanal 1 DMA - nadajnik
     DMA1SA = txBuf->buffer;
     DMA1DA = &U0TXBUF;
     DMA1SZ = 0x01;
     DMACTL0 |= DMA1TSEL_0;
-    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN | DMAIE; // Single repeated DMADT_4 , albo Single DMADT_0
+    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN | DMAIE;
 
 }
 // Funkcja wpisuje dane do bufora nadajnika, a takze inicjalizuje transmisje jesli nie jest zainicjalizowana
 void send(char *data, size_t length) {
-	if (DMA1CTL & DMAEN){
-		DMA1CTL &= ~DMAEN;
-		circularBufferWrite(txBuf, data, length);
-		DMA1CTL |= DMAEN;
-	} else {
-		circularBufferWrite(txBuf, data, length);
-	}
+
+	DMA1CTL &= ~DMAEN;
+	circularBufferWrite(txBuf, data, length);
+	DMA1CTL |= DMAEN;
 
 	if (((DMACTL0 & 240) == 0) && (U0TCTL & TXEPT)) {
 		DMA1CTL |= DMAEN;
@@ -194,7 +188,12 @@ void send(char *data, size_t length) {
 #pragma vector=DACDMA_VECTOR
 __interrupt void DMA (void) {
 	if(DMA0CTL & DMAIFG){  // Przerwania odbiornika
-		DMA0DA = rxBuf->buffer + ((++rxBuf->writePointer) % BUFFER_SIZE);
+		if(freeSpace(rxBuf) > 0){
+			++rxBuf->writePointer;
+		}
+		if(rxBuf->writePointer < BUFFER_SIZE) DMA0DA = rxBuf->buffer + rxBuf->writePointer;
+		else DMA0DA = rxBuf->buffer + rxBuf->writePointer - BUFFER_SIZE;
+
 		if (freeSpace(rxBuf) == BUFFER_MARGIN) {
 			P1OUT |= CTS;
 		}
@@ -202,20 +201,21 @@ __interrupt void DMA (void) {
 		DMA0CTL |= DMAEN;
 	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
 		ME1 |= UTXE0;
-		DMA1SA = txBuf->buffer + ((++txBuf->readPointer) % BUFFER_SIZE);
-		if (freeSpace(txBuf) == BUFFER_MARGIN) {
-			P1OUT |= CTS;
-		}
+		++txBuf->readPointer;
+		if(txBuf->readPointer < BUFFER_SIZE) DMA1SA = txBuf->buffer + txBuf->readPointer;
+		else DMA1SA = txBuf->buffer + txBuf->readPointer - BUFFER_SIZE;
+
+
 		if (txBuf->readPointer >= txBuf->size && txBuf->writePointer >= txBuf->size){
 			txBuf->readPointer = txBuf->readPointer - txBuf->size;
 			txBuf->writePointer = txBuf->writePointer - txBuf->size;
 		}
 
 		if(freeSpace(txBuf) == BUFFER_SIZE){
-			DMACTL0 &= ~240;
+			DMACTL0 &= ~DMA1TSEL_15;
 			DMACTL0 |= DMA1TSEL_0;
 		} else {
-			DMACTL0 &= ~240;
+			DMACTL0 &= ~DMA1TSEL_15;
 			DMACTL0 |= DMA1TSEL_4;
 		}
 		DMA1CTL &= ~DMAREQ;
