@@ -1,42 +1,79 @@
 #include <msp430.h> 
+#include <stdio.h>
 #include "hd44780.h"
+#include "CircularBuffer.h"
 
-int volt;
+#define BUFFER_SIZE 500
+
+uint16_t measurementPending = 0;
+uint8_t mode = 0;
+uint8_t held = 0;
+uint16_t bufferContents[BUFFER_SIZE];
+CircularBuffer *buffer;
 
 int main(void) {
-    WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
-//    BCSCTL1 = CALBC1_1MHZ;                                    // Set range to calibrated 1MHz
-//      DCOCTL  = CALDCO_1MHZ;                                    // Set DCO step and modulation to calibrated 1MHz
+	WDTCTL = WDTPW | WDTHOLD;
 
-      P1DIR = 0xFF;                                              // Set P1.0 (D0) to P1.7 (D7) to output (HD44780 data lines)
-      P2DIR = (0x01 | 0x02);                                    // Set P2.0 (E) and P2.1 (RS) to output (HD44780 control lines - R/W is tied to GND)
+	P1DIR = 0xFF;
+	P2DIR = (0x01 | 0x02);
+	P6SEL |= BIT0;
 
-      TACCR1  = 0x3E8;                                          // Set CCR1 value for 1 ms interrupt (1000 / 1 MHz) = 0.001
-      TACCTL1 = CCIE;                                          // Compare interrupt enable
-      TACTL   = (TASSEL_2 | MC_2 | TACLR);                     // SMCLK as clock source, continuous mode, timer clear
+	TACCR1 = 0x9E8;
+	TACCTL1 = OUTMOD_4 | CCIE;
+	TACTL = TASSEL_2 | MC_2 | TACLR;
 
-      __bis_SR_register( GIE );                                 // Enable global interrupts
-      volt = ADC12MEM15;
-      hd44780_clear_screen();                                   // Clear display content
+	ADC12CTL0 = ADC12ON | ADC12SC;
+	ADC12CTL1 = SHP | SHS_1 | CONSEQ_2;
+	ADC12MCTL0 |= EOS;
+	ADC12IE |= BIT0;
+	
+	FCTL2 |= FWKEY + FSSEL_1;
 
-      while( 1 )                                                // Endless loop - main program
-      {
-        hd44780_write_string( "Hello world!", 1, 1, NO_CR_LF ); // Write text string to first row and first column of display
-      }
+	buffer = circularBufferInit(BUFFER_SIZE, bufferContents);
+	hd44780_clear_screen();
+
+	__bis_SR_register(GIE);
+
+	ADC12CTL0 |= ENC;
+
+	while (1) {
+		LPM1;
+		if (measurementPending) {
+			circularBufferWrite(buffer, ADC12MEM0);
+			circularBufferUpdateMax(buffer);
+			circularBufferUpdateMean(buffer);
+			char bar[16] = "                ";
+			uint8_t bars = mode ? buffer->max : buffer->mean * 17L / 4096L;
+			int i;
+			for (i = 0; i < bars; i++) {
+				bar[i] = '\xFF';
+			}
+			hd44780_write_string(bar, 2, 1, NO_CR_LF);
+			hd44780_timer_isr();
+			measurementPending = 0;
+		}
+	}
 }
 
 #pragma vector = TIMERA1_VECTOR
-__interrupt void timer_0_a1_isr( void )                     // Timer 0 A1 interrupt service routine
-{
-  switch( TAIV )                                           // Determine interrupt source
-  {
-    case 2:                                                 // CCR1 caused the interrupt
-    {
-      TACCR1 += 1000;                                      // Add CCR1 value for next interrupt in 1 ms
+__interrupt void timer_0_a1_isr( void ) {
+	held = (~P3IN & BIT0) ? held + 1 : 0;
+	if (held == 10) {
+		mode = mode ? 0 : 1;
+		FCTL3 = FWKEY;
+		FCTL1 = FWKEY + WRT;
+		
+		*(0x1943) = mode;
+		FCTL1 = FWKEY;
+		FCTL3 = FWKEY + LOCK;
+	}
+	TACCR1 += 1000;
+	TACCTL1 &= ~CCIFG;
+}
 
-      hd44780_timer_isr();                                  // Call HD44780 state machine
-
-      break;                                                // CCR1 interrupt handling done
-    }
-  }
+#pragma vector = ADC12_VECTOR
+__interrupt void ADC12_ISR(void) {
+	measurementPending = 1;
+	ADC12IFG = 0;
+	LPM1_EXIT;
 }
