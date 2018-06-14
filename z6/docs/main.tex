@@ -59,9 +59,23 @@
 
 Celem projektu było stworzenie wskaźnika wysterowania, który na wyświetlaczu LCD miał wyświetlać symbole graficzne zależne od poziomu napięcia wejściowego. Miał on prezentować wartość średnią i maksymalną z ustalonej liczby próbek, a tryb wyświetlania miał być przełączany przyciskiem i zachowywany w pamięci nieulotnej.
 
-\section{Dodatkowe założenia i decyzje}
+\section{Założenia i decyzje}
 
-Napięcie mierzone jest przetwornikiem analogowo-cyfrowym, dwunastobitowym, wbudowanym w MSP430. Jego napięciem odniesienia jest poziom 3.3 V. Prezentacja wyniku w postaci bargrafu wyświetlana jest na wyświetlaczu LCD z podświetleniem, sterowanym przez układ HD77480. 
+Napięcie mierzone jest przetwornikiem analogowo-cyfrowym, dwunastobitowym, wbudowanym w MSP430. Jego napięciem odniesienia jest poziom 3.3 V. Wynik prezentowany jest na wyświetlaczu LCD 16x2 z podświetleniem, sterowanym przez układ HD77480. W pierwszej jego linii wyświetlamy:
+\begin{itemize}
+	\item \textbf{tryb pracy}: MAX lub AVG
+	\item \textbf{napięcie} w mV zależnie od trybu pracy, średnie lub maksymalne z ustalonej liczby próbek
+	\item \textbf{indykator watchdoga}, tzn. jeśli ostatni reset był spowodowany przez WDT, to wyświetlana jest litera W
+\end{itemize}
+W drugiej linii natomiast znajduje się bargraf wizualizujący napięcie widniejące w pierwszej linii.
+
+Dodatkowo użyliśmy DMA, aby wyniki pomiarów z ADC przekazywać prosto do bufora, który z kolei służył do obliczania wartości średniej oraz maksymalnej napięcia. Układ watchdog został użyty w celu zapobiegnięcia nieprawidłowej pracy urządzenia. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{img/ui.png}
+	\caption{Projekt interfejsu użytkownika}
+\end{figure}
 
 \section{Program}
 \subsection{main.c}
