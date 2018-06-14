@@ -16,8 +16,8 @@ void circularBufferUpdateMax(MeasBuffer *self) {
   int i;
   for (i = 1; i < self->size; ++i) {
     self->max =
-      self->buffer[i] > self->max ? self->buffer[i]
-                                  : self->max;
+      self->buffer[i] > self->max ?
+      self->buffer[i] : self->max;
   }
 }
 

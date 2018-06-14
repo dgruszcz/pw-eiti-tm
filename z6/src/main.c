@@ -14,9 +14,7 @@ uint8_t *flashPointer = 0;
 uint8_t wdtifg = 0;
 
 void findFlashPointer();
-
 void writeNonvolatile(uint8_t data);
-
 void eraseNonvolatile();
 
 int main(void) {
@@ -66,15 +64,16 @@ int main(void) {
       char info[] = "                ";
       char bar[] = "                ";
       sprintf(info, "%s  %d mV           ",
-              mode ? "MAX" : "AVG",
-              mode ? buffer->max * 3300L / 4096L :
-              buffer->mean * 3300L / 4096L);
+        mode ? "MAX" : "AVG",
+        mode ? buffer->max * 3300L / 4096L :
+        buffer->mean * 3300L / 4096L
+      );
       if (wdtifg) {
         info[15] = 'W';
       }
       hd44780_write_string(info, 1, 1, NO_CR_LF);
       uint8_t bars = mode ? buffer->max * 17L / 4096L :
-                     buffer->mean * 17L / 4096L;
+        buffer->mean * 17L / 4096L;
       int i;
       for (i = 0; i < bars; i++) {
         bar[i] = '\xFF';
