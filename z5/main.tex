@@ -56,7 +56,7 @@
 \setcounter{page}{1}
 
 \section{Wstęp}
-Na piątym laboratorium mieliśmy za zadanie, realizację ładowania tekstu z pliku do mikrokontrolera MSP430 poprzez port szeregowy RS232 oraz jego konwersję poprzez usuwanie powtórzonych znaków oraz zbędnych spacji, odpowiednią modyfikację wielkich oraz małych liter, a także dostawianie brakujących spacji.
+Na piątym laboratorium mieliśmy za zadanie realizację ładowania tekstu z pliku do mikrokontrolera MSP430 poprzez port szeregowy RS232, jego konwersję poprzez usuwanie powtórzonych znaków oraz zbędnych spacji, odpowiednią modyfikację wielkich oraz małych liter a także dostawianie brakujących spacji.
 
 
 Ostateczny układ składał się z następujących elementów:
@@ -68,7 +68,7 @@ Ostateczny układ składał się z następujących elementów:
 \end{itemize}
 
 \section{Modyfikacje zadania}
-W zadaniu dodatkowo zdecydowaliśmy się wykorzystać dwa kanały sterownika DMA. Jeden do odczytu danych z odbiornika w przypadku ich otrzymania, drugi do wpisywania danych do nadajnika w momencie gdy w buforze znajdują się dane do wysłania oraz nadajnik jest gotowy do transmisji.
+W zadaniu dodatkowo zdecydowaliśmy się wykorzystać dwa kanały sterownika DMA: jeden do odczytu danych z odbiornika w przypadku ich otrzymania, drugi do wpisywania danych do nadajnika w momencie gdy w buforze znajdują się dane do wysłania oraz nadajnik jest gotowy do transmisji.
 
 
 
@@ -77,29 +77,49 @@ Nadawane poprzez komputer znaki wysyłane są za pomocą portu szeregowego do od
 
 Za przetwarzanie znaków odpowiedzialna jest pętla główna programu. Wszystkie znaki przed przetworzeniem odczytywane są z bufora odbiornika w takiej samej kolejności w jakiej zostały do niego wpisane. Kowersja tekstu odbywa się poprzez sprawdzanie czy ciąg kilku kolejnych znaków zawiera błędy. Jeżeli tak, są one poprawiane przed dalszym ich przesłaniem. Po zakończeniu konwersji znaki są wpisywane do bufora nadajnika.
 
-Za przenoszenie znaków z bufora do rejestru nadajnika odpowiedzialny jest drugi wykorzystany przez nas kanał sterownika DMA. W momencie gdy do bufora trafiają pierwsze dane, w celu zainicjowania transmisji, ręcznie inicjowany jest pierwszy transfer. Następne transfery inicjowane są automatycznie poprzez flagę przerwań.
+Za przenoszenie znaków z bufora do rejestru nadajnika odpowiedzialny jest drugi wykorzystany przez nas kanał sterownika DMA. W momencie gdy do bufora trafiają pierwsze dane, w celu zainicjowania transmisji ręcznie inicjowany jest pierwszy transfer. Następne transfery inicjowane są automatycznie poprzez flagę przerwań.
 
-Ze względu na strukturę buforów, obydwa kanały sterownika DMA pracują w trybie pojedyńczego transferu. Oznacza to, że po każdym transferze wymagane jest podjęcie obsługi przerwania w celu ponownej ich aktywacji. Jest to niezbędne ze względu na to, że bufory posiadają ograniczoną wielkość oraz ich wskaźniki zapisu oraz oczytu danych muszą być inkrementowane po każdej operacji. W celu jak najszybszego przygotowania systemu na odbiór kolejdych danych, inkrementacja oraz przestawianie wskaźników z końca bufora na początek realizowane są podczas obsługi przerwania po każdym transferze.
+Ze względu na strukturę buforów, obydwa kanały sterownika DMA pracują w trybie pojedyńczego transferu. Oznacza to, że po każdym transferze wymagane jest podjęcie obsługi przerwania w celu ponownej ich aktywacji. Jest to niezbędne ze względu na to, że bufory posiadają ograniczoną wielkość oraz ich wskaźniki zapisu oraz oczytu danych muszą być inkrementowane po każdej operacji. W celu jak najszybszego przygotowania systemu na odbiór kolejnych danych, inkrementacja oraz przestawianie wskaźników z końca bufora na początek realizowane są podczas obsługi przerwania po każdym transferze.
 
-Transmisja pomiędzy komputerem a mikrokontrolerem odbywa się z bardzo dużą prędkością. Ze względu na to, że średni czas przetwarzanie tekstu jest dłuższy niż wynosi czas pomiędzy kolejnymi odebranymi znakami, przy dużej ilości otrzymywanych danych następuje przepełnienie bufora odbiornika. Aby temu zapobiec, w momencie gdy bufor jest w połowie zapełniony, wysyłany jest synał żadania wstrzymania transmisji. Transmisja jest wznawiana dopiero po całkowitym opróżnieniu bufora.
+Transmisja pomiędzy komputerem a mikrokontrolerem odbywa się z bardzo dużą prędkością. Ze względu na to, że średni czas przetwarzanie tekstu jest dłuższy niż wynosi czas pomiędzy kolejnymi odebranymi znakami, przy dużej ilości otrzymywanych danych następuje przepełnienie bufora odbiornika. Aby temu zapobiec, w momencie gdy bufor jest w połowie zapełniony, wysyłany jest synał żądania wstrzymania transmisji. Transmisja jest wznawiana dopiero po całkowitym opróżnieniu bufora.
 
-
-
-
-\pagebreak
-\section{Schemat układu}
-
+\section{Sekcja krytyczna}
+Na czas dostępu do buforu odbioru podczas pobierania znaków do analizy i buforu transmisji podczas przygotowania do wysłania blokowane są przerwania DMA w celu uniknięcia jednoczesnego dostępu przez DMA i program do tego samego rejestru i nadpisania któregoś ze znaków lub uszkodzenia zapisu znaku.
 
 
 \pagebreak
- \section{Program}
 
+\section{Program}
+\subsection{main.c}
 
-
+\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[lastline=60, style=customc]{src/main.c}
+\end{minipage}\hfill
+\noindent\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[firstline=61, lastline=107, style=customc]{src/main.c}
+\end{minipage}\hfill
 
 \pagebreak
-\section{Możliwości udoskonalenia systemu}
 
+\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[firstline=108, lastline=170, style=customc]{src/main.c}
+\end{minipage}\hfill
+\noindent\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[firstline=171, lastline=215, style=customc]{src/main.c}
+\end{minipage}\hfill
+
+\pagebreak
+
+\noindent\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[firstline=216, style=customc]{src/main.c}
+	\subsubsection{CircularBuffer.h}
+	\lstinputlisting[style=customc]{src/CircularBuffer.h}
+	\subsubsection{CircularBuffer.c}
+	\lstinputlisting[lastline=20, style=customc]{src/CircularBuffer.c}
+\end{minipage}\hfill
+\noindent\begin{minipage}[t]{.45\textwidth}
+	\lstinputlisting[firstline=21, style=customc]{src/CircularBuffer.c}
+\end{minipage}\hfill
 
 \end{document}
 \grid
