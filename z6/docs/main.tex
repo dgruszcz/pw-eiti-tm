@@ -55,6 +55,14 @@
 
 \setcounter{page}{1}
 
+\section{Cel projektu}
+
+Celem projektu było stworzenie wskaźnika wysterowania, który na wyświetlaczu LCD miał wyświetlać symbole graficzne zależne od poziomu napięcia wejściowego. Miał on prezentować wartość średnią i maksymalną z ustalonej liczby próbek, a tryb wyświetlania miał być przełączany przyciskiem i zachowywany w pamięci nieulotnej.
+
+\section{Dodatkowe założenia i decyzje}
+
+Napięcie mierzone jest przetwornikiem analogowo-cyfrowym, dwunastobitowym, wbudowanym w MSP430. Jego napięciem odniesienia jest poziom 3.3 V. Prezentacja wyniku w postaci bargrafu wyświetlana jest na wyświetlaczu LCD z podświetleniem, sterowanym przez układ HD77480. 
+
 \section{Program}
 \subsection{main.c}
 
