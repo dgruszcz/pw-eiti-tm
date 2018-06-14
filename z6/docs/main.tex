@@ -1,0 +1,105 @@
+\documentclass[fleqn]{article}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{parskip}
+\usepackage{icomma}
+\usepackage[a4paper,includeheadfoot,margin=1.27cm]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[hypcap=true]{subcaption}
+\usepackage{xcolor}
+\usepackage{transparent}
+\usepackage{listings}
+\usepackage[colorlinks=true, linkcolor=blue, pdfborder={0 0 0}]{hyperref}
+
+\renewcommand\thesection{\arabic{section}.}
+\renewcommand\thesubsection{\alph{subsection})}
+\renewcommand\thesubsubsection{}
+\newcommand\square[1]{
+	\fcolorbox{black}{#1}{\rule{0pt}{6pt}\rule{6pt}{0pt}}
+}
+
+\brokenpenalty=1000
+\clubpenalty=1000
+\widowpenalty=1000
+
+\lstdefinestyle{customc}{
+	belowcaptionskip=1\baselineskip,
+	breaklines=true,
+	frame=L,
+	xleftmargin=\parindent,
+	language=C,
+	showstringspaces=false,
+	basicstyle=\footnotesize\ttfamily,
+	keywordstyle=\bfseries\color{green!40!black},
+	commentstyle=\itshape\color{purple!40!black},
+	identifierstyle=\color{blue},
+	stringstyle=\color{orange},
+}
+
+
+\title{TM -- Laboratorium 5. \\ \large Ładowanie oraz konwersja tekstu z pliku}
+\author{Krystian Chachuła \\ Dawid Gruszczyński \\ Marcin Skrzypkowski}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{page}{0}
+\thispagestyle{empty}
+
+\pagebreak
+
+\setcounter{page}{1}
+
+\section{Wstęp}
+Na piątym laboratorium mieliśmy za zadanie, realizację ładowania tekstu z pliku do mikrokontrolera MSP430 poprzez port szeregowy RS232 oraz jego konwersję poprzez usuwanie powtórzonych znaków oraz zbędnych spacji, odpowiednią modyfikację wielkich oraz małych liter, a także dostawianie brakujących spacji.
+
+
+Ostateczny układ składał się z następujących elementów:
+
+\begin{itemize}
+	\item \textbf{10\_PS1} (moduł zasilacza)
+	\item \textbf{570\_MSP430F14x} (moduł mikrokontrolera Texas Instruments serii MSP430f14x lub F16x)
+	\item \textbf{06x\_EIA232\_4} (moduł łącza szeregowego RS232)
+\end{itemize}
+
+\section{Modyfikacje zadania}
+W zadaniu dodatkowo zdecydowaliśmy się wykorzystać dwa kanały sterownika DMA. Jeden do odczytu danych z odbiornika w przypadku ich otrzymania, drugi do wpisywania danych do nadajnika w momencie gdy w buforze znajdują się dane do wysłania oraz nadajnik jest gotowy do transmisji.
+
+
+
+\section{Implementacja}
+Nadawane poprzez komputer znaki wysyłane są za pomocą portu szeregowego do odbiornika interfejsu UART mikrokontrolera MSP. Następnie przenoszone są za pomocą jednego z kanałów sterownika DMA do bufora przechowującego odebrane, nieprzetworzone dane.
+
+Za przetwarzanie znaków odpowiedzialna jest pętla główna programu. Wszystkie znaki przed przetworzeniem odczytywane są z bufora odbiornika w takiej samej kolejności w jakiej zostały do niego wpisane. Kowersja tekstu odbywa się poprzez sprawdzanie czy ciąg kilku kolejnych znaków zawiera błędy. Jeżeli tak, są one poprawiane przed dalszym ich przesłaniem. Po zakończeniu konwersji znaki są wpisywane do bufora nadajnika.
+
+Za przenoszenie znaków z bufora do rejestru nadajnika odpowiedzialny jest drugi wykorzystany przez nas kanał sterownika DMA. W momencie gdy do bufora trafiają pierwsze dane, w celu zainicjowania transmisji, ręcznie inicjowany jest pierwszy transfer. Następne transfery inicjowane są automatycznie poprzez flagę przerwań.
+
+Ze względu na strukturę buforów, obydwa kanały sterownika DMA pracują w trybie pojedyńczego transferu. Oznacza to, że po każdym transferze wymagane jest podjęcie obsługi przerwania w celu ponownej ich aktywacji. Jest to niezbędne ze względu na to, że bufory posiadają ograniczoną wielkość oraz ich wskaźniki zapisu oraz oczytu danych muszą być inkrementowane po każdej operacji. W celu jak najszybszego przygotowania systemu na odbiór kolejdych danych, inkrementacja oraz przestawianie wskaźników z końca bufora na początek realizowane są podczas obsługi przerwania po każdym transferze.
+
+Transmisja pomiędzy komputerem a mikrokontrolerem odbywa się z bardzo dużą prędkością. Ze względu na to, że średni czas przetwarzanie tekstu jest dłuższy niż wynosi czas pomiędzy kolejnymi odebranymi znakami, przy dużej ilości otrzymywanych danych następuje przepełnienie bufora odbiornika. Aby temu zapobiec, w momencie gdy bufor jest w połowie zapełniony, wysyłany jest synał żadania wstrzymania transmisji. Transmisja jest wznawiana dopiero po całkowitym opróżnieniu bufora.
+
+
+
+
+\pagebreak
+\section{Schemat układu}
+
+
+
+\pagebreak
+ \section{Program}
+
+
+
+
+\pagebreak
+\section{Możliwości udoskonalenia systemu}
+
+
+\end{document}
+\grid
