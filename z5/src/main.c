@@ -1,227 +1,168 @@
-#include <msp430.h>
-#include <stdint.h>
+#include <msp430.h> 
+#include <stdio.h>
+#include "hd44780.h"
 #include "CircularBuffer.h"
-#include <ctype.h>
 
-#define CTS BIT2
-#define TxD BIT4
-#define RxD BIT5
+#define BUFFER_SIZE 150
 
-#define BUFFER_SIZE 128
-#define BUFFER_MARGIN 64
+uint16_t measurementPending = 0;
+uint8_t mode = 0;
+uint8_t held = 0;
+uint16_t bufferContents[BUFFER_SIZE];
+CircularBuffer *buffer;
+uint8_t *flashPointer = 0;
+uint8_t wdtifg = 0;
 
-char txBufBuf[BUFFER_SIZE];
-char rxBufBuf[BUFFER_SIZE];
-
-void InitUART ();
-void InitDMA ();
-
-CircularBuffer *rxBuf;
-CircularBuffer *txBuf;
-
-void send(char *data, size_t length);
+void findFlashPointer();
+void writeNonvolatile(uint8_t data);
+void eraseNonvolatile();
 
 int main(void) {
-    WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+	wdtifg = IFG1 & WDTIFG;
+	IFG1 &= ~ WDTIFG;
+	WDTCTL = WDTPW | WDTCNTCL | WDTSSEL;
 
-    // Konfiguracja pinow
-    P1DIR |= CTS;
-    P3DIR |= TxD;
-    P3SEL |= RxD | TxD;
+	P1DIR = 0xFF;
+	P2DIR = (0x01 | 0x02);
+	P6SEL |= BIT0;
 
-    InitUART();
+	TACTL = TASSEL_1 | MC_2 | TACLR;
+	TACCTL1 = OUTMOD_4 | CCIE;
+	TACCTL2 = CCIE;
+	TACCR1 = 32768 / 50;
+	TACCR2 = 32768 / 200;
 
-    // Przelaczane MCLK na XT2CLK
- 	BCSCTL1 |= XTS;
- 	BCSCTL2 |= SELM_2;
- 	int i;
- 	do{
- 		IFG1 &= ~OFIFG;
- 		for(i = 0; i < 0xFF; ++i);
- 	} while (IFG1 & OFIFG);
+	ADC12CTL0 = ADC12ON | ADC12SC;
+	ADC12CTL1 = SHP | SHS_1 | CONSEQ_2;
+	ADC12MCTL0 |= EOS;
 
-    rxBuf = circularBufferInit(BUFFER_SIZE, txBufBuf);
-    txBuf = circularBufferInit(BUFFER_SIZE, rxBufBuf);
+	buffer = circularBufferInit(BUFFER_SIZE, bufferContents);
+	hd44780_clear_screen();
 
-    InitDMA();
-
-    __bis_SR_register(GIE);
-
-    char last[] = "\00\00\00";
-
-    while (1) {
-    	if (freeSpace(rxBuf) == BUFFER_SIZE && freeSpace(txBuf) == BUFFER_SIZE) {
-    		if (freeSpace(rxBuf) == rxBuf->size) {
-    			P1OUT &= ~CTS;
-    		}
-    		__bis_SR_register(LPM1_bits);
-    	}
-
-    	DMA0CTL &= ~DMAEN;
-    	if (!circularBufferRead(rxBuf, last+2, 1)) {
-    		if (freeSpace(rxBuf) == rxBuf->size) {
-    			P1OUT &= ~CTS;
-    		}
-    		DMA0CTL |= DMAEN;
-			continue;
-    	}
-    	DMA0CTL |= DMAEN;
-
-    // Poczatek pliku lub nowa linia
-		if (last[1] == '\00') {
-			if (last[2] == '\012' || last[2] == '\015'){
-				send(last+2, 1);
-				last[1]='\00';
-				last[2]='\00';
-				continue;
-			}
-
-			if (last[2] == ' ') {
-				continue;
-			}
-
-			last[2] = (char)toupper(last[2]);
-			last[0] = last[1];
-			last[1] = last[2];
-			continue;
-		}
-
-		// Usuwanie powtorzonych znakow
-		if (toupper(last[1]) == toupper(last[2])) {
-			continue;
-		}
-
-		// Wykrywanie spacji przed kropka i innymi takimi
-		if (last[1] == ' ' && (last[2] == '.'|| last[2] == ',' || last[2] == ':' || last[2] == ';' || last[2] == ')' || last[2] == '!' || last[2] == '?')){
-			last[1]=last[2];
-			continue;
-		}
-
-		// Spacja po kropce
-		if((last[1] == '.' || last[1] == ',' || last[1] == ':' || last[1] == ';' || last[1] == ')' || last[1] == '!' || last[1] == '?') && last[2] != ' '){
-			 send(last + 1, 1);
-		    	last[0] = last[1];
-		    	last[1]= ' ';
-		}
-
-		// Spacja przed otwarciem nawiasu
-		if (last[2] == '(' && last[1] != ' '){
-			send(last + 1, 1);
-			last[0] = last[1];
-			last[1]= ' ';
-		}
-
-		// Duzy znak po spacji i kropce
-		if (last[1] == ' ' &&  last[0] == '.') {
-			last[2] = (char)toupper(last[2]);
-		}
-
-		// Znak nowej linii
-		if (last[2] == '\012' || last[2] == '\015') {
-			send(last+1, 2);
-			last[1]='\00';
-			last[2]='\00';
-			continue;
-		}
-
-		// Maly znak w srodku zdania
-		if (last[0] != '.' && last[1] != ' '){
-			last[2]=tolower(last[2]);
-		}
-
-		send(last + 1, 1);
-		last[0] = last[1];
-		last[1] = last[2];
-    }
-}
-
-void InitUART (){
-    // Konfiguracji zegara oraz UARTa
-    BCSCTL1 = RSEL2 | RSEL0;
-	DCOCTL = DCO0;
-    U0CTL = CHAR;
-    U0TCTL = SSEL1 | SSEL0 | TXEPT;
-    U0BR1 = 0;
-    U0BR0 = 0x09;
-    U0MCTL = 0x08;
-
-    ME1 = URXE0;
-    IFG1 &= ~UTXIFG0;
-}
-
-void InitDMA (){
     // DMA Init
     DMACTL1 |= DMAONFETCH;
 
     // Kanal 0 DMA - odbiornik
-    DMA0SA = &U0RXBUF;
-    DMA0DA = rxBuf->buffer;
-    DMA0SZ = 0x01;
-    DMACTL0 |= DMA0TSEL_3;
-    DMA0CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE| DMALEVEL | DMAEN | DMAIE;
+    DMA0SA = &ADC12MEM0;
+    DMA0DA = buffer->buffer;
+    DMA0SZ = buffer->size;
+    DMACTL0 |= DMA0TSEL_6;
+    DMA0CTL |= DMADT_4 | DMADSTINCR_3 | DMALEVEL | DMAEN;
 
-    // Kanal 1 DMA - nadajnik
-    DMA1SA = txBuf->buffer;
-    DMA1DA = &U0TXBUF;
-    DMA1SZ = 0x01;
-    DMACTL0 |= DMA1TSEL_0;
-    DMA1CTL |= DMADT_0 | DMADSTBYTE | DMASRCBYTE | DMALEVEL | DMAEN | DMAIE;
+	__bis_SR_register(GIE);
+
+	ADC12CTL0 |= ENC;
+	findFlashPointer();
+
+	WDTCTL = WDTPW | WDTCNTCL | WDTSSEL;
+
+	while (1) {
+		LPM1;
+		if (measurementPending) {
+			circularBufferUpdateMax(buffer);
+			circularBufferUpdateMean(buffer);
+			char info[] = "                ";
+			char bar[] = "                ";
+			sprintf(info, "%s  %d mV           ", mode ? "MAX" : "AVG", mode ? buffer->max * 3300L / 4096L : buffer->mean * 3300L / 4096L);
+			if (wdtifg) {
+				info[15] = 'W';
+			}
+			hd44780_write_string(info, 1, 1, NO_CR_LF);
+			uint8_t bars = mode ? buffer->max * 17L / 4096L : buffer->mean * 17L / 4096L;
+			int i;
+			for (i = 0; i < bars; i++) {
+				bar[i] = '\xFF';
+
+			}
+			hd44780_write_string(bar, 2, 1, NO_CR_LF);
+			measurementPending = 0;
+		}
+		if (P3IN & BIT7) {
+			WDTCTL = WDTPW | WDTCNTCL | WDTSSEL;
+		}
+	}
+}
+
+#pragma vector = TIMERA1_VECTOR
+__interrupt void timer_0_a1_isr( void ) {
+	uint8_t reason = TAIV;
+	if (reason == TAIV_TACCR1) {
+		TACCR1 += 32768 / 50;
+		measurementPending = 1;
+		LPM1_EXIT;
+	}
+	if (reason == TAIV_TACCR2) {
+		hd44780_timer_isr();
+		held = (~P3IN & BIT0) ? held + 1 : 0;
+		if (held == 10) {
+			mode = mode ? 0 : 1;
+			writeNonvolatile(mode);
+		}
+		TACCR2 += 32768 / 200;
+	}
+}
+
+void findFlashPointer() {
+	uint8_t *a = 0x01000;
+	int i;
+	for (i = 127; i >= 0; i--) {
+		if ((*(a + i) & 0xFE) == 0xAC) {
+			if (i == 127) {
+				flashPointer = a;
+				mode = *(a + i) & BIT0;
+				eraseNonvolatile();
+			} else {
+				flashPointer = a + i + 1;
+				mode = *(a + i) & BIT0;
+			}
+			break;
+		}
+	}
+	if (!flashPointer) {
+		eraseNonvolatile();
+		flashPointer = a;
+	}
 
 }
-// Funkcja wpisuje dane do bufora nadajnika, a takze inicjalizuje transmisje jesli nie jest zainicjalizowana
-void send(char *data, size_t length) {
 
-	DMA1CTL &= ~DMAEN;
-	circularBufferWrite(txBuf, data, length);
-	DMA1CTL |= DMAEN;
+void writeNonvolatile(uint8_t data) {
+	if (!flashPointer) {
+		return;
+	}
 
-	if (((DMACTL0 & 240) == 0) && (U0TCTL & TXEPT)) {
-		DMA1CTL |= DMAEN;
-		DMA1CTL |= DMAREQ;
+	WDTCTL = WDTPW | WDTHOLD;
+	__bic_SR_register(GIE);
+
+	FCTL2 = FWKEY | FSSEL_1 | FN0;
+	FCTL3 = FWKEY;
+	FCTL1 = FWKEY | WRT;
+	*(flashPointer) = 0xAC | (mode & BIT0);
+	FCTL1 = FWKEY;
+	FCTL3 = FWKEY | LOCK;
+	flashPointer++;
+	if (flashPointer > 0x0107F) {
+		eraseNonvolatile();
+		flashPointer = 0x01000;
+		writeNonvolatile(mode);
 	}
-	if (freeSpace(txBuf) == BUFFER_MARGIN) {
-		P1OUT |= CTS;
-	}
+
+	__bis_SR_register(GIE);
+	WDTCTL = WDTPW | WDTCNTCL | WDTSSEL;
+}
+
+void eraseNonvolatile() {
+	WDTCTL = WDTPW | WDTHOLD;
+	__bic_SR_register(GIE);
+
+	FCTL2 = FWKEY | FSSEL_1 | FN0;
+	FCTL3 = FWKEY;
+	FCTL1 = FWKEY | ERASE;
+	uint8_t *segment = 0x01000;
+	*(segment) = 0;
+	FCTL3 = FWKEY | LOCK;
+
+	__bis_SR_register(GIE);
+	WDTCTL = WDTPW | WDTCNTCL | WDTSSEL;
 }
 
 
-#pragma vector=DACDMA_VECTOR
-__interrupt void DMA (void) {
-	if(DMA0CTL & DMAIFG){  // Przerwania odbiornika
-		if(freeSpace(rxBuf) > 0){
-			++rxBuf->writePointer;
-		}
-		if(rxBuf->writePointer < BUFFER_SIZE) DMA0DA = rxBuf->buffer + rxBuf->writePointer;
-		else DMA0DA = rxBuf->buffer + rxBuf->writePointer - BUFFER_SIZE;
-
-		if (freeSpace(rxBuf) == BUFFER_MARGIN) {
-			P1OUT |= CTS;
-		}
-		DMA0CTL &= ~DMAIFG;
-		DMA0CTL |= DMAEN;
-	} else if (DMA1CTL & DMAIFG) {  // Przerwania nadajnika
-		ME1 |= UTXE0;
-		++txBuf->readPointer;
-		if(txBuf->readPointer < BUFFER_SIZE) DMA1SA = txBuf->buffer + txBuf->readPointer;
-		else DMA1SA = txBuf->buffer + txBuf->readPointer - BUFFER_SIZE;
-
-
-		if (txBuf->readPointer >= txBuf->size && txBuf->writePointer >= txBuf->size){
-			txBuf->readPointer = txBuf->readPointer - txBuf->size;
-			txBuf->writePointer = txBuf->writePointer - txBuf->size;
-		}
-
-		if(freeSpace(txBuf) == BUFFER_SIZE){
-			DMACTL0 &= ~DMA1TSEL_15;
-			DMACTL0 |= DMA1TSEL_0;
-		} else {
-			DMACTL0 &= ~DMA1TSEL_15;
-			DMACTL0 |= DMA1TSEL_4;
-		}
-		DMA1CTL &= ~DMAREQ;
-		DMA1CTL &= ~DMAIFG;
-		ME1 &= ~UTXE0;
-		DMA1CTL |= DMAEN;
-	}
-	LPM1_EXIT;
-}

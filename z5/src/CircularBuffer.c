@@ -1,56 +1,40 @@
 #include "CircularBuffer.h"
 
-CircularBuffer *circularBufferInit(size_t size, char *bufBuf) {
+CircularBuffer *circularBufferInit(size_t size, uint16_t *bufBuf) {
 	CircularBuffer *circularBuffer = malloc((size_t) sizeof(CircularBuffer));
 	circularBuffer->buffer = bufBuf;
 
 	circularBuffer->size = size;
-	circularBuffer->readPointer = 0;
 	circularBuffer->writePointer = 0;
 
 	return circularBuffer;
 }
 
-size_t freeSpace(CircularBuffer *self) {
-	return self->size - (self->writePointer - self->readPointer);
+void circularBufferWrite(CircularBuffer *self, uint16_t data) {
+	self->buffer[self->writePointer++] = data;
+
+
+	if (self->writePointer >= self->size) {
+		self->writePointer = 0;
+
+	}
 }
 
-size_t circularBufferRead(CircularBuffer *self, char *data, size_t length) {
-	size_t read = 0;
-	int dataLength = self->writePointer - self->readPointer; // Ilosc bajtow zapisanych w buforze
-
-	dataLength = length > dataLength ? dataLength : length;  // Ilosc bajtow do oczytania
-	read = dataLength;
-	while (dataLength--){
-		self->readPointer++;
-		if (self->readPointer < self->size) {
-			*(data++) = self->buffer[self->readPointer];
-		} else {
-			*(data++) = self->buffer[self->readPointer - self->size];
-		}
-
+void circularBufferUpdateMax(CircularBuffer *self) {
+	self->max = self->buffer[0];
+	int i;
+	for (i = 1; i < self->size; ++i) {
+		self->max = self->buffer[i] > self->max ? self->buffer[i] : self->max;
 	}
-
-	if (self->readPointer >= self->size && self->writePointer >= self->size){
-		self->readPointer = self->readPointer - self->size;
-		self->writePointer = self->writePointer - self->size;
-	}
-	return read;
 }
 
-size_t circularBufferWrite(CircularBuffer *self,char *data, size_t length) {
-	size_t written = 0;
-	int dataLength = self->size - (self->writePointer - self->readPointer); // Dostepne miejsce w buforze
+void circularBufferUpdateMean(CircularBuffer *self) {
+	uint32_t sum = self->buffer[0];
+	int i;
+	for (i = 1; i < self->size; ++i) {
+		sum += self->buffer[i];
 
-	dataLength = length > dataLength ? dataLength : length;  // Ilosc bajtow mozliwych do zapisania
-	written = dataLength;
-	while (dataLength--){
-		self->writePointer++;
-		if (self->writePointer < self->size) {
-			self->buffer[self->writePointer] = *(data++);
-		} else {
-			self->buffer[self->writePointer - self->size] = *(data++);
-		}
 	}
-	return written;
+
+	self->mean = sum / self->size;
 }
