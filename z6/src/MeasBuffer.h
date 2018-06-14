@@ -12,10 +12,10 @@ typedef struct MeasBuffer {
 } MeasBuffer;
 
 MeasBuffer *
-circularBufferInit(size_t size, uint16_t *bufBuf);
+measBufferInit(size_t size, uint16_t *bufBuf);
 
-void circularBufferUpdateMax(MeasBuffer *self);
+void measBufferUpdateMax(MeasBuffer *self);
 
-void circularBufferUpdateMean(MeasBuffer *self);
+void measBufferUpdateMean(MeasBuffer *self);
 
 #endif /* MEASBUFFER_H_ */

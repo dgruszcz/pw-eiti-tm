@@ -36,7 +36,7 @@ int main(void) {
   ADC12CTL1 = SHP | SHS_1 | CONSEQ_2;
   ADC12MCTL0 |= EOS;
 
-  buffer = circularBufferInit(BUFFER_SIZE, bufferContents);
+  buffer = measBufferInit(BUFFER_SIZE, bufferContents);
   hd44780_clear_screen();
 
   // DMA Init
@@ -59,8 +59,8 @@ int main(void) {
   while (1) {
     LPM1;
     if (measurementPending) {
-      circularBufferUpdateMax(buffer);
-      circularBufferUpdateMean(buffer);
+      measBufferUpdateMax(buffer);
+      measBufferUpdateMean(buffer);
       char info[] = "                ";
       char bar[] = "                ";
       sprintf(info, "%s  %d mV           ",

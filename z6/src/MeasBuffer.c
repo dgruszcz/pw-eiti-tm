@@ -1,7 +1,7 @@
 #include "MeasBuffer.h"
 
 MeasBuffer *
-circularBufferInit(size_t size, uint16_t *bufBuf) {
+measBufferInit(size_t size, uint16_t *bufBuf) {
   MeasBuffer *measBuffer = malloc(
     (size_t) sizeof(MeasBuffer));
   measBuffer->buffer = bufBuf;
@@ -11,7 +11,7 @@ circularBufferInit(size_t size, uint16_t *bufBuf) {
   return measBuffer;
 }
 
-void circularBufferUpdateMax(MeasBuffer *self) {
+void measBufferUpdateMax(MeasBuffer *self) {
   self->max = self->buffer[0];
   int i;
   for (i = 1; i < self->size; ++i) {
@@ -21,7 +21,7 @@ void circularBufferUpdateMax(MeasBuffer *self) {
   }
 }
 
-void circularBufferUpdateMean(MeasBuffer *self) {
+void measBufferUpdateMean(MeasBuffer *self) {
   uint32_t sum = self->buffer[0];
   int i;
   for (i = 1; i < self->size; ++i) {
