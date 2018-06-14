@@ -61,7 +61,16 @@ Celem projektu było stworzenie wskaźnika wysterowania, który na wyświetlaczu
 
 \section{Dodatkowe założenia i decyzje}
 
-Napięcie mierzone jest przetwornikiem analogowo-cyfrowym, dwunastobitowym, wbudowanym w MSP430. Jego napięciem odniesienia jest poziom 3.3 V. Prezentacja wyniku w postaci bargrafu wyświetlana jest na wyświetlaczu LCD z podświetleniem, sterowanym przez układ HD77480. 
+Napięcie mierzone jest przetwornikiem analogowo-cyfrowym, dwunastobitowym, wbudowanym w MSP430. Jego napięciem odniesienia jest poziom 3.3 V. Prezentacja wyniku w postaci bargrafu wyświetlana jest na wyświetlaczu LCD z podświetleniem, sterowanym przez układ HD77480.
+
+
+\section{Obsługa pamięci flash}
+Jednym z głównych założeń projektu było zapisywanie aktualnego trybu wyświetlania w pamięci flash. W naszym przypadku sama dana byłą stosunkowow prosta, przyjęliśmy wartość $0$ jako oznaczenie trybu średniej arytmetycznej oraz wartość $1$ jako oznaczenie trybu wartości maksymalnej. Aby umożliwić odnalezienie tych pojedynczych symboli pojedynczą informację zapisywaliśmy na jednym bajcie z ustalonym uprzednio hasłem na siedmiu ważniejszych bitach. Klucz ma wartość $ACh$. Zapis odbywa się do kolejnych bajtów od początku przestrzeni pamięci flash o adresie $01000h$ do $0107Fh$. Jeśli przekroczona zostanie ilość 128 zapisów, cały segment zostanie wyczyszczony a zapis będzie kontynuowany od początku przestrzeni. Taka implementacja zapisu podyktowana jest sposobem poszukiwania ostatniego zapisu w celu odtworzenia trybu. Poszukujemy danych od ostatnich pozycji w bloku 128 bajtów, pierwszy napotkany bajt z pasującym kluczem jest zarazem ostatnią zapisaną informacją. Kasowanie pamięci jest potrzebne w celu uniknięcia zapętlenia wpisów - wtedy wykrytym trybem byłby zawsze zapisany na bajcie $0107Fh$.
+
+\section{ADC i DMA}
+Do mierzenia napięcia wejściowego wykorzystaliśmy przetwornik ADC w trybie repeat-single-channel, który pobudzany interwałem z timera A cyklicznie wykonuje pomiary i wpisuje wyniki do rejestru pamięci ADC12MEM0, skąd do bufora cyklicznego przepisuje je DMA.
+
+
 
 \section{Program}
 \subsection{main.c}
