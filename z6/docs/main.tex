@@ -88,6 +88,12 @@ Jeśli przekroczona zostanie ilość 128 zapisów, cały segment zostanie wyczys
 \section{ADC i DMA}
 Do mierzenia napięcia wejściowego wykorzystaliśmy przetwornik ADC w trybie repeat-single-channel, który pobudzany zboczem narastającym na wyjściu kanału 1 timera A cyklicznie wykonuje pomiary i wpisuje wyniki do rejestru pamięci ADC12MEM0, skąd do bufora cyklicznego przepisuje je sterownik DMA pracujący w trybie repeated single transfer. Po każdym ustawieniu flagi ADC12IFG następuje transfer do bufora cyklicznego.
 
+\section{HD44780}
+Jako interfejs pomiędzy naszym programem, a wyświetlaczem LCD użyliśmy biblioteki Dennisa Eichmanna o nazwie \textit{Fool-proof C library for HD44780 LCDs of all usual sizes}.
+
+Można znaleźć ją pod adresem \textit{https://e2e.ti.com/group/launchyourdesign/m/msp430microcontrollerprojects/666684}
+
+
 
 
 \section{Program}
